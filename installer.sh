@@ -326,14 +326,11 @@ if [ $SRC_RC -ne 0 ]; then
   echo " ⚠ .bashrc returned non-zero ($SRC_RC) — continuing anyway"
 fi
 
-echo " Running initial push..."
-if _hpc_push; then
-  echo " ✓ Initial push complete"
-else
-  echo " ⚠ Initial push failed — run 'hpc-push' manually after checking 'hpc-debug'"
-fi
-
-
+echo " Kicking off initial push in background..."
+( _hpc_push ) </dev/null >"$HOME/.hpc-push.log" 2>&1 &
+disown $! 2>/dev/null
+echo " ✓ Push started — will complete in ~1-2 min"
+echo "   (check ~/.hpc-push.log if data doesn't appear on GitHub)"
 echo ""
 echo " ┌─────────────────────────────────────────────────────┐"
 echo " │  Remember: this is not a wall of shame 😄           │"
