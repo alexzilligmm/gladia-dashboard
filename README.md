@@ -11,7 +11,7 @@ A minimal dashboard to keep track of our compute allocations on **Leonardo**.
 1. **Ask me for the token.** You need a GitHub token to push your data — please don't try to work around this, the GitHub bot has already tested my patience beyond repair.
 2. **Download and run the installer on a login node:**
    ```bash
-   curl -sL https://raw.githubusercontent.com/alexzilligmm/gladia-dashboard/main/install.sh | bash
+   curl -sL https://raw.githubusercontent.com/alexzilligmm/gladia-dashboard/main/installer.sh | bash
    ```
 3. That's it. Your data will show up on the dashboard next time the script runs.
 
