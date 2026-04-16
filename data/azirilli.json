@@ -1,12 +1,12 @@
 {
   "user": "azirilli",
-  "timestamp": "2026-04-16T13:11:33Z",
-  "hostname": "login05.leonardo.local",
+  "timestamp": "2026-04-16T13:12:44Z",
+  "hostname": "login01.leonardo.local",
   "pi_of": ["",],
   "jobs": [
-    {"id":"39967534","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:39:01","nodes":"1","nodelist":"lrdn2042"},
-    {"id":"39967519","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:39:35","nodes":"1","nodelist":"lrdn0368"},
-    {"id":"39967495","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:40:43","nodes":"1","nodelist":"lrdn0585"}
+    {"id":"39967534","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:40:13","nodes":"1","nodelist":"lrdn2042"},
+    {"id":"39967519","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:40:47","nodes":"1","nodelist":"lrdn0368"},
+    {"id":"39967495","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:41:55","nodes":"1","nodelist":"lrdn0585"}
   ],
   "budgets": [
     {"account":"IscrC_M4R","start":"20251103","end":"20260803","total":80000,"consumed":87333,"percent":109.2},
@@ -20,10 +20,10 @@
   ],
   "usage": [
     {"account":"IscrC_SLEY","consumed":"15441:44:19","num_jobs":5578},
+    {"account":"IscrC_NNID","consumed":"12292:23:46","num_jobs":2054},
     {"account":"IscrC_eff-SAM2","consumed":"2447:22:27","num_jobs":1092},
-    {"account":"IscrC_USAE","consumed":"1281:41:53","num_jobs":306},
-    {"account":"IscrC_MGNTC","consumed":"565:55:46","num_jobs":212},
     {"account":"IscrC_TVU","consumed":"36417:14:49","num_jobs":6723},
-    {"account":"IscrC_NNID","consumed":"12292:23:46","num_jobs":2054}
+    {"account":"IscrC_MGNTC","consumed":"565:55:46","num_jobs":212},
+    {"account":"IscrC_USAE","consumed":"1281:41:53","num_jobs":306}
   ]
 }
