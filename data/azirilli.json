@@ -1,11 +1,11 @@
 {
   "user": "azirilli",
-  "timestamp": "2026-04-16T12:44:26Z",
+  "timestamp": "2026-04-16T12:45:25Z",
   "hostname": "login01.leonardo.local",
   "jobs": [
-    {"id":"39967534","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:11:54","nodes":"1","nodelist":"lrdn2042"},
-    {"id":"39967519","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:12:28","nodes":"1","nodelist":"lrdn0368"},
-    {"id":"39967495","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:13:36","nodes":"1","nodelist":"lrdn0585"}
+    {"id":"39967534","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:12:53","nodes":"1","nodelist":"lrdn2042"},
+    {"id":"39967519","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:13:27","nodes":"1","nodelist":"lrdn0368"},
+    {"id":"39967495","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:14:35","nodes":"1","nodelist":"lrdn0585"}
   ],
   "budgets": [
     {"account":"IscrC_M4R","start":"20251103","end":"20260803","total":80000,"consumed":87333,"percent":87333.0},
