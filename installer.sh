@@ -39,9 +39,6 @@ if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
   echo ""
 fi
 
-# ---------- Token ----------
-<<PASTE TOKEN HERE>>
-
 # ---------- PI Projects ----------
 if [ -n "$EXISTING_PI" ]; then
   echo " Current PI projects: $EXISTING_PI"
