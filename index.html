@@ -84,7 +84,7 @@ function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;"
 // Calculates the global Doomsday date by finding the Total Remaining / Total Lab Depletion Rate
 function cDD() {
   const n = Date.now();
-  let active = [];
+  let active =[];
   aB().forEach(b => {
     const s = pS(b);
     if (s.k === "active" || s.k === "ending") {
@@ -99,36 +99,48 @@ function cDD() {
 
   let t = 0;
   while (active.length > 0) {
-    // Find the time delta (dt) to the very next budget death
     let dt = Infinity;
     let min_i = -1;
     let spilled_v = 0;
+    
     for (let i = 0; i < active.length; i++) {
       let curr = active[i];
-      const ttd = Math.min(curr.r / curr.v, curr.e - t);
-      if (ttd > 0 && ttd < dt) {
+      // FIX: Clamp negatives to 0 to safely handle floating-point inaccuracies
+      const ttd = Math.max(0, Math.min(curr.r / curr.v, curr.e - t));
+      
+      // FIX: Removed "ttd > 0" to allow processing of simultaneous depletions
+      if (ttd < dt) {
         dt = ttd;
         min_i = i;
         spilled_v = curr.v;
       }
     }
     
-    if (dt === Infinity || dt <= 0) break;
+    // FIX: Only break on Infinity. Allow dt === 0 to pass through
+    if (dt === Infinity) break;
+    
     t += dt;
     active.splice(min_i, 1);
-    let max_i = -1;
-    let curr_max_r = -1;
-    for (let i = 0; i < active.length; i++) {
-      let curr = active[i];
-      curr.r = curr.r - curr.v * dt;
-      if (curr_max_r < curr.r) {
-        curr_max_r = curr.r;
-        max_i = i;
+    
+    // FIX: Guard against operating on an empty array when the last budget dies
+    if (active.length > 0) {
+      let max_i = -1;
+      let curr_max_r = -Infinity; // Safer than -1
+      
+      for (let i = 0; i < active.length; i++) {
+        let curr = active[i];
+        curr.r = curr.r - curr.v * dt;
+        if (curr_max_r < curr.r) {
+          curr_max_r = curr.r;
+          max_i = i;
+        }
       }
+      active[max_i].v += spilled_v;
     }
-    active[max_i].v += spilled_v;
   }
-  return new Date(n + t);
+  
+  // FIX: Convert 't' back to milliseconds before creating the final Date
+  return new Date(n + Math.round(t * 864e5));
 }
 const R="alexzilligmm/gladia-dashboard",UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
