@@ -64,12 +64,30 @@
 <div class="container">
 <header class="masthead"><div class="brand"><img class="brand-logo" src="assets/logo_gladia_un_colore.svg" onerror="this.src='assets/logo_gladia_un_colore.png'" alt="GLADIA"><div><div class="brand-name">GLADIA</div><div class="brand-sub">HPC Console · Leonardo</div></div></div><div class="masthead-right"><div class="date-line" id="date-line">—</div><button class="refresh-btn" onclick="fetchData()">↻ Refresh</button></div></header>
 <div class="sub-bar"><span>Compute usage across active ISCRA allocations</span><span id="last-refresh">—</span></div>
-<div id="banner"></div><div class="stats" id="stats"></div>
+<div id="banner">
+<div id="doomsday-container"></div>
+</div><div class="stats" id="stats"></div>
 <div class="tabs-bar"><div class="tabs"><button class="tab active" data-view="projects" onclick="setView('projects')">Projects <span class="tab-count" id="ct-projects">0</span></button><button class="tab" data-view="members" onclick="setView('members')">Members <span class="tab-count" id="ct-members">0</span></button></div><div class="sort-ctrl" id="sort-ctrl"><label>Sort</label><select id="sort-select" onchange="onSort()"></select></div></div>
 <div id="content"><div class="loading">Fetching the latest reports…</div></div>
 <footer class="page-footer"><span>GLADIA · Sapienza University of Rome</span><span><a href="https://gladia.di.uniroma1.it" target="_blank">gladia.di.uniroma1.it</a> · <a href="https://github.com/alexzilligmm/gladia-dashboard" target="_blank">source</a></span></footer>
 </div>
 <script>
+function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+// Calculates the global Doomsday date by finding the Total Remaining / Total Lab Depletion Rate
+function cDD() {
+  const n = Date.now();
+  let r = 0, v = 0;
+  aB().forEach(b => {
+    const s = pS(b);
+    if (s.k === "active" || s.k === "ending") {
+      const d = Math.max(1, (n - pD(b.start).getTime()) / 864e5); // days elapsed
+      r += Math.max(0, b.total - b.consumed); // total remaining quota
+      v += b.consumed / d; // depletion rate (quota used per day)
+    }
+  });
+  if (v <= 0 || r <= 0) return null;
+  return new Date(n + (r / v) * 864e5);
+}
 const R="alexzilligmm/gladia-dashboard",UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
 let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",expanded:{}};
@@ -113,6 +131,9 @@ case"name":return bs.sort((a,b)=>a.account.localeCompare(b.account));
 default:return bs.sort((a,b)=>{const sa=pS(a),sb=pS(b);return so[sa.k]!==so[sb.k]?so[sa.k]-so[sb.k]:b.percent-a.percent})}}
 
 function render(){const all=aB(),act=all.filter(b=>pS(b).k!=="expired").length,ov=all.filter(b=>b.percent>=100&&dB(pD(b.end))>=0).length,run=S.users.reduce((s,u)=>s+(u.jobs?.filter(j=>j.state==="RUNNING").length||0),0),tot=all.reduce((s,b)=>s+b.consumed,0);
+// Render Doomsday Clock if applicable
+const dd = cDD();
+document.getElementById("doomsday-container").innerHTML = dd ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.04);border-color:rgba(130,34,53,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:0;margin-bottom:20px;"><div><div style="color:var(--bad);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">⏳</span> Doomsday Clock</div><div style="font-size:12px;color:var(--ink-muted)">Estimated depletion of all remaining HPC allocations across the lab.</div></div><div style="text-align:right"><div style="font-family:'EB Garamond',Georgia,serif;font-size:24px;color:var(--ink);font-weight:500;line-height:1">${dd.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bad);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${Math.max(0,Math.ceil((dd.getTime()-Date.now())/864e5))} days left</div></div></div>` : '';
 document.getElementById("stats").innerHTML=`<div class="stat"><div class="stat-label">Projects</div><div class="stat-value tnum">${act}</div><div class="stat-sub">of ${all.length} · ${ov} over</div></div><div class="stat"><div class="stat-label">Members</div><div class="stat-value tnum">${S.users.length}</div><div class="stat-sub">reporting</div></div><div class="stat"><div class="stat-label">Running</div><div class="stat-value tnum" style="color:${run>0?'var(--good)':'var(--ink-muted)'}">${run}</div><div class="stat-sub">jobs on cluster</div></div><div class="stat"><div class="stat-label">Consumed</div><div class="stat-value tnum">${fH(tot)}</div><div class="stat-sub">core-hours</div></div>`;
 document.getElementById("ct-projects").textContent=all.length;document.getElementById("ct-members").textContent=S.users.length;
 document.getElementById("content").innerHTML=S.view==="projects"?rP():rM()}
