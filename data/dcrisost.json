@@ -1,8 +1,8 @@
 {
   "user": "dcrisost",
-  "timestamp": "2026-04-16T20:40:26Z",
+  "timestamp": "2026-04-16T21:13:39Z",
   "hostname": "login01.leonardo.local",
-  "pi_of": [],
+  "pi_of": ["IsCd3_M4R","IsCc7_USAE"],
   "jobs": [
 
   ],
@@ -17,12 +17,12 @@
     {"account":"IscrC_YENDRI","start":"20251103","end":"20260803","total":80000,"consumed":6428,"percent":8.0}
   ],
   "usage": [
-    {"account":"IscrC_RDM","consumed":"1035:23:33","num_jobs":309},
-    {"account":"IscrC_SLEY","consumed":"2628:37:54","num_jobs":243},
     {"account":"IscrC_TVU","consumed":"1886:43:28","num_jobs":287},
     {"account":"IscrC_LENS","consumed":"2301:36:19","num_jobs":1889},
     {"account":"IscrC_USAE","consumed":"245:27:18","num_jobs":201},
-    {"account":"IscrC_M4R","consumed":"596:29:18","num_jobs":9},
-    {"account":"IscrC_MGNTC","consumed":"6644:14:47","num_jobs":582}
+    {"account":"IscrC_MGNTC","consumed":"6644:14:47","num_jobs":582},
+    {"account":"IscrC_SLEY","consumed":"2628:37:54","num_jobs":243},
+    {"account":"IscrC_RDM","consumed":"1035:23:33","num_jobs":309},
+    {"account":"IscrC_M4R","consumed":"596:29:18","num_jobs":9}
   ]
 }
