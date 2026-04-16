@@ -318,11 +318,20 @@ echo " ✓ Installed to $BASHRC"
 echo " ✓ Permissions: 600"
 echo ""
 echo " Sourcing bashrc..."
+set +e
 source "$BASHRC"
+SRC_RC=$?
+set -e
+if [ $SRC_RC -ne 0 ]; then
+  echo " ⚠ .bashrc returned non-zero ($SRC_RC) — continuing anyway"
+fi
 
 echo " Running initial push..."
-_hpc_push
-echo " ✓ Initial push complete"
+if _hpc_push; then
+  echo " ✓ Initial push complete"
+else
+  echo " ⚠ Initial push failed — run 'hpc-push' manually after checking 'hpc-debug'"
+fi
 
 
 echo ""
