@@ -1,23 +1,29 @@
 {
   "user": "azirilli",
-  "timestamp": "2026-04-16T12:45:25Z",
+  "timestamp": "2026-04-16T13:09:32Z",
   "hostname": "login01.leonardo.local",
+  "pi_of": ["",],
   "jobs": [
-    {"id":"39967534","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:12:53","nodes":"1","nodelist":"lrdn2042"},
-    {"id":"39967519","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:13:27","nodes":"1","nodelist":"lrdn0368"},
-    {"id":"39967495","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:14:35","nodes":"1","nodelist":"lrdn0585"}
+    {"id":"39967534","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:37:00","nodes":"1","nodelist":"lrdn2042"},
+    {"id":"39967519","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:37:34","nodes":"1","nodelist":"lrdn0368"},
+    {"id":"39967495","user":"azirilli","partition":"boost_usr_prod","name":"he-aware-training","state":"RUNNING","time":"1:38:42","nodes":"1","nodelist":"lrdn0585"}
   ],
   "budgets": [
-    {"account":"IscrC_M4R","start":"20251103","end":"20260803","total":80000,"consumed":87333,"percent":87333.0},
-    {"account":"IscrC_RDM","start":"20250226","end":"20251126","total":80000,"consumed":79376,"percent":79376.0},
-    {"account":"IscrC_TVU","start":"20251103","end":"20260803","total":80000,"consumed":42379,"percent":42379.0},
-    {"account":"IscrC_LENS","start":"20251125","end":"20260825","total":80000,"consumed":82311,"percent":82311.0},
-    {"account":"IscrC_NNID","start":"20250804","end":"20260504","total":60000,"consumed":62385,"percent":62385.0},
-    {"account":"IscrC_SLEY","start":"20250620","end":"20260320","total":80000,"consumed":86430,"percent":86430.0},
-    {"account":"IscrC_USAE","start":"20250327","end":"20251227","total":80000,"consumed":82037,"percent":82037.0},
-    {"account":"IscrC_eff-SAM2","start":"20251222","end":"20260922","total":80000,"consumed":50041,"percent":50041.0}
+    {"account":"IscrC_M4R","start":"20251103","end":"20260803","total":80000,"consumed":87333,"percent":109.2},
+    {"account":"IscrC_RDM","start":"20250226","end":"20251126","total":80000,"consumed":79376,"percent":99.2},
+    {"account":"IscrC_TVU","start":"20251103","end":"20260803","total":80000,"consumed":42379,"percent":53.0},
+    {"account":"IscrC_LENS","start":"20251125","end":"20260825","total":80000,"consumed":82311,"percent":102.9},
+    {"account":"IscrC_NNID","start":"20250804","end":"20260504","total":60000,"consumed":62385,"percent":104.0},
+    {"account":"IscrC_SLEY","start":"20250620","end":"20260320","total":80000,"consumed":86430,"percent":108.0},
+    {"account":"IscrC_USAE","start":"20250327","end":"20251227","total":80000,"consumed":82037,"percent":102.5},
+    {"account":"IscrC_eff-SAM2","start":"20251222","end":"20260922","total":80000,"consumed":50041,"percent":62.6}
   ],
   "usage": [
-
+    {"account":"IscrC_USAE","consumed":"1281:41:53","num_jobs":306},
+    {"account":"IscrC_SLEY","consumed":"15441:44:19","num_jobs":5578},
+    {"account":"IscrC_NNID","consumed":"12292:23:46","num_jobs":2054},
+    {"account":"IscrC_eff-SAM2","consumed":"2447:22:27","num_jobs":1092},
+    {"account":"IscrC_TVU","consumed":"36417:14:49","num_jobs":6723},
+    {"account":"IscrC_MGNTC","consumed":"565:55:46","num_jobs":212}
   ]
 }
