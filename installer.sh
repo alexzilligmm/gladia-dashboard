@@ -39,6 +39,31 @@ if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
   echo ""
 fi
 
+# ---------- Project name normalizer ----------
+# Converts portal IDs (IsCd3_M4R) to saldo IDs (IscrC_M4R)
+_normalize_project_name() {
+  local NAME="$1"
+  if [[ "$NAME" =~ ^IsC[a-zA-Z][0-9]_(.+)$ ]]; then
+    echo "IscrC_${BASH_REMATCH[1]}"
+  else
+    echo "$NAME"
+  fi
+}
+
+_normalize_pi_projects() {
+  local INPUT="$1"
+  local OUT=""
+  for P in $INPUT; do
+    local N
+    N=$(_normalize_project_name "$P")
+    if [ "$N" != "$P" ]; then
+      echo "   Normalized: $P → $N" >&2
+    fi
+    OUT="$OUT $N"
+  done
+  echo "$OUT" | sed 's/^ //'
+}
+
 if [ -z "$TOKEN" ]; then
   read -p " GitHub token: " TOKEN
 fi
@@ -60,6 +85,11 @@ elif [ "$HAS_PREVIOUS" = "1" ]; then
   read -p " PI projects (Enter to skip, or space-separated list): " PI_PROJECTS
 else
   read -p " Are you PI of ISCRA projects? List them (e.g. IscrC_eff-SAM2 IscrC_LENS) or Enter to skip: " PI_PROJECTS
+fi
+
+# ---------- Normalize portal-style project names ----------
+if [ -n "$PI_PROJECTS" ]; then
+  PI_PROJECTS=$(_normalize_pi_projects "$PI_PROJECTS")
 fi
 
 # ---------- Backup ----------
@@ -224,6 +254,12 @@ hpc-addproject() {
     return 1
   fi
   local PROJECT="$1"
+  # Normalize portal ID (IsCd3_M4R) to saldo ID (IscrC_M4R)
+  if [[ "$PROJECT" =~ ^IsC[a-zA-Z][0-9]_(.+)$ ]]; then
+    local NORMALIZED="IscrC_${BASH_REMATCH[1]}"
+    echo "  Normalized: $PROJECT → $NORMALIZED"
+    PROJECT="$NORMALIZED"
+  fi
   # Check if already listed
   if echo " $HPC_PI_PROJECTS " | grep -q " $PROJECT "; then
     echo "Already tracking $PROJECT"
@@ -249,6 +285,10 @@ hpc-rmproject() {
     return 1
   fi
   local PROJECT="$1"
+  # Normalize portal ID so users can remove with either form
+  if [[ "$PROJECT" =~ ^IsC[a-zA-Z][0-9]_(.+)$ ]]; then
+    PROJECT="IscrC_${BASH_REMATCH[1]}"
+  fi
   export HPC_PI_PROJECTS=$(echo "$HPC_PI_PROJECTS" | sed "s|$PROJECT||g" | tr -s ' ' | sed 's/^ //;s/ $//')
   sed -i "s|^export HPC_PI_PROJECTS=\".*\"|export HPC_PI_PROJECTS=\"$HPC_PI_PROJECTS\"|" "$HOME/.bashrc"
   echo "✓ Removed $PROJECT"
