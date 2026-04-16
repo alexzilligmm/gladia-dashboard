@@ -20,8 +20,9 @@
 .tabs-bar{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:1px solid var(--rule);margin-top:36px}.tabs{display:flex}
 .tab{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;background:none;border:none;color:var(--ink-muted);padding:12px 18px 12px 0;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .15s}.tab+.tab{padding-left:18px}.tab.active{color:var(--ink);border-bottom-color:var(--brand)}.tab:hover:not(.active){color:var(--ink-soft)}
 .tab-count{display:inline-block;margin-left:6px;padding:1px 6px;background:var(--rule-soft);border-radius:99px;font-size:9px;color:var(--ink-soft)}
-.sort-ctrl{display:flex;align-items:center;gap:8px;padding-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-muted)}
-.sort-ctrl label{letter-spacing:.1em;text-transform:uppercase}.sort-ctrl select{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:4px 22px 4px 8px;color:var(--ink);cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238a8478'/></svg>");background-repeat:no-repeat;background-position:right 6px center}
+.toolbar{display:flex;align-items:center;gap:12px;padding-bottom:12px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-muted)}
+.toolbar label{letter-spacing:.1em;text-transform:uppercase}.toolbar select{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:4px 22px 4px 8px;color:var(--ink);cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238a8478'/></svg>");background-repeat:no-repeat;background-position:right 6px center}
+.filter-toggle{display:flex;align-items:center;gap:5px;cursor:pointer;-webkit-user-select:none;user-select:none}.filter-toggle input{accent-color:var(--brand);cursor:pointer}
 .banner{background:rgba(180,118,40,.08);border:1px solid rgba(180,118,40,.25);border-left:3px solid var(--warn);padding:12px 16px;margin:18px 0;font-size:13px;color:var(--ink-soft);border-radius:2px}
 .project-card,.member-card{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:22px;margin-bottom:16px;box-shadow:var(--shadow);animation:rise .4s ease-out backwards}
 .project-card:hover,.member-card:hover{box-shadow:0 2px 4px rgba(60,40,20,.06),0 6px 18px rgba(60,40,20,.06)}
@@ -53,6 +54,13 @@
 .state-pill{display:inline-flex;align-items:center;gap:5px;padding:2px 7px;border-radius:2px;font-size:9px;font-weight:500;letter-spacing:.08em;text-transform:uppercase}.state-dot{width:5px;height:5px;border-radius:50%}
 .state-RUNNING{background:rgba(90,127,62,.12);color:var(--good);border:1px solid rgba(90,127,62,.25)}.state-RUNNING .state-dot{background:var(--good);animation:pulse 2s infinite}
 .state-PENDING{background:rgba(180,118,40,.1);color:var(--warn);border:1px solid rgba(180,118,40,.25)}.state-PENDING .state-dot{background:var(--warn)}
+.lb-section{margin-bottom:32px}.lb-title{font-family:'EB Garamond',Georgia,serif;font-size:22px;font-weight:500;margin-bottom:4px}.lb-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:14px}
+.lb-row{display:grid;grid-template-columns:28px 12px 1fr auto;gap:10px;align-items:center;padding:10px 16px;background:var(--card);border:1px solid var(--rule);border-top:none;font-size:13px}.lb-row:first-of-type{border-top:1px solid var(--rule);border-radius:3px 3px 0 0}.lb-row:last-of-type{border-radius:0 0 3px 3px}
+.lb-medal{font-size:18px;text-align:center;line-height:1}.lb-rank{font-family:'EB Garamond',Georgia,serif;font-style:italic;font-size:16px;color:var(--ink-muted);text-align:center}
+.lb-name{font-weight:500}.lb-val{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;color:var(--ink)}
+.lb-bar-wrap{grid-column:3/5;height:4px;background:var(--rule-soft);border-radius:2px;overflow:hidden;margin-top:4px}.lb-bar-fill{height:100%;border-radius:2px}
+.svd-card{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:22px;box-shadow:var(--shadow)}.svd-card canvas{width:100%;height:220px;display:block;margin-top:10px}
+.svd-legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px}.svd-legend-item{display:flex;align-items:center;gap:6px}.svd-legend-dot{width:10px;height:3px;border-radius:1px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .project-card:nth-child(1),.member-card:nth-child(1){animation-delay:.02s}.project-card:nth-child(2),.member-card:nth-child(2){animation-delay:.05s}.project-card:nth-child(3),.member-card:nth-child(3){animation-delay:.08s}.project-card:nth-child(4),.member-card:nth-child(4){animation-delay:.11s}.project-card:nth-child(5),.member-card:nth-child(5){animation-delay:.14s}.project-card:nth-child(6),.member-card:nth-child(6){animation-delay:.17s}.project-card:nth-child(7),.member-card:nth-child(7){animation-delay:.20s}.project-card:nth-child(8),.member-card:nth-child(8){animation-delay:.23s}
 .page-footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-muted);flex-wrap:wrap;gap:10px}.page-footer a{color:var(--brand);text-decoration:none}.page-footer a:hover{text-decoration:underline}
@@ -66,8 +74,8 @@
 <div class="sub-bar"><span>Compute usage across active ISCRA allocations</span><span id="last-refresh">—</span></div>
 <div id="banner"></div>
 <div id="doomsday-container"></div>
-</div><div class="stats" id="stats"></div>
-<div class="tabs-bar"><div class="tabs"><button class="tab active" data-view="projects" onclick="setView('projects')">Projects <span class="tab-count" id="ct-projects">0</span></button><button class="tab" data-view="members" onclick="setView('members')">Members <span class="tab-count" id="ct-members">0</span></button></div><div class="sort-ctrl" id="sort-ctrl"><label>Sort</label><select id="sort-select" onchange="onSort()"></select></div></div>
+<div class="stats" id="stats"></div>
+<div class="tabs-bar"><div class="tabs"><button class="tab active" data-view="projects" onclick="setView('projects')">Projects <span class="tab-count" id="ct-projects">0</span></button><button class="tab" data-view="members" onclick="setView('members')">Members <span class="tab-count" id="ct-members">0</span></button><button class="tab" data-view="fun" onclick="setView('fun')">Stats</button></div><div class="toolbar" id="toolbar"><label class="filter-toggle" id="filter-wrap"><input type="checkbox" id="filter-active" onchange="S.filterActive=this.checked;render()"> Only active</label><label>Sort</label><select id="sort-select" onchange="onSort()"></select></div></div>
 <div id="content"><div class="loading">Fetching the latest reports…</div></div>
 <footer class="page-footer"><span>GLADIA · Sapienza University of Rome</span><span><a href="https://gladia.di.uniroma1.it" target="_blank">gladia.di.uniroma1.it</a> · <a href="https://github.com/alexzilligmm/gladia-dashboard" target="_blank">source</a></span></footer>
 </div>
@@ -90,7 +98,7 @@ function cDD() {
 }
 const R="alexzilligmm/gladia-dashboard",UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
-let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",expanded:{}};
+let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",filterActive:false,expanded:{}};
 function pH(s){if(!s)return 0;const p=String(s).split(":");return parseInt(p[0]||0)+parseInt(p[1]||0)/60+parseInt(p[2]||0)/3600}
 function fH(h){if(h>=1e5)return(h/1e3).toFixed(0)+"k";if(h>=1e3)return(h/1e3).toFixed(1)+"k";return Math.round(h).toLocaleString()}
 function fI(n){return Number(n).toLocaleString()}
@@ -100,7 +108,6 @@ function dB(d){return Math.ceil((d-Date.now())/864e5)}
 function fM(s){return pD(s).toLocaleDateString("en-US",{month:"short",year:"numeric"})}
 function pS(b){const days=dB(pD(b.end)),o=b.percent>=100;if(days<0)return{k:"expired",l:`ended ${-days}d ago`,c:"chip-expired"};if(o)return{k:"over",l:`${days}d · over quota`,c:"chip-over"};if(days<30)return{k:"ending",l:`${days}d left`,c:"chip-ending"};return{k:"active",l:`${days}d left`,c:"chip-active"}}
 function pC(p){return p>=100?"var(--bad)":p>=90?"var(--warn)":"var(--ink)"}
-function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 
 async function fetchData(){
 document.getElementById("content").innerHTML='<div class="loading">Fetching the latest reports…</div>';document.getElementById("banner").innerHTML="";
@@ -114,7 +121,10 @@ document.getElementById("last-refresh").textContent=`Refreshed ${now.toLocaleTim
 
 function aB(){const m={};S.users.forEach(u=>u.budgets?.forEach(b=>{m[b.account]=b}));return Object.values(m)}
 function setView(v){S.view=v;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===v));updateSortOpts();render()}
-function updateSortOpts(){const sel=document.getElementById("sort-select"),v=S.view;const opts=v==="projects"?[["status","Status"],["availability","Availability (h left)"],["percent-asc","% Used ↑"],["percent-desc","% Used ↓"],["name","Name"]]:[["consumed","Consumed ↓"],["consumed-asc","Consumed ↑"],["jobs","Jobs ↓"],["name","Name"]];sel.innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");const cur=v==="projects"?S.sort:S.msort;if(opts.some(o=>o[0]===cur))sel.value=cur;else{sel.value=opts[0][0];if(v==="projects")S.sort=opts[0][0];else S.msort=opts[0][0]}}
+function updateSortOpts(){const sel=document.getElementById("sort-select"),tb=document.getElementById("toolbar"),fw=document.getElementById("filter-wrap"),v=S.view;
+if(v==="fun"){tb.style.display="none";return}
+tb.style.display="flex";fw.style.display=v==="projects"?"flex":"none";
+const opts=v==="projects"?[["status","Status"],["expiry","Expiry (soonest)"],["availability","Availability (h left)"],["percent-asc","% Used ↑"],["percent-desc","% Used ↓"],["name","Name"]]:[["consumed","Consumed ↓"],["consumed-asc","Consumed ↑"],["jobs","Jobs ↓"],["name","Name"]];sel.innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");const cur=v==="projects"?S.sort:S.msort;if(opts.some(o=>o[0]===cur))sel.value=cur;else{sel.value=opts[0][0];if(v==="projects")S.sort=opts[0][0];else S.msort=opts[0][0]}}
 function sortM(ws){switch(S.msort){case"consumed-asc":return ws.sort((a,b)=>a.tk-b.tk);case"jobs":return ws.sort((a,b)=>b.tj-a.tj);case"name":return ws.sort((a,b)=>a.u.user.localeCompare(b.u.user));default:return ws.sort((a,b)=>b.tk-a.tk)}}
 function onSort(){const v=document.getElementById("sort-select").value;if(S.view==="projects")S.sort=v;else S.msort=v;render()}
 function tE(k){S.expanded[k]=!S.expanded[k];render()}
@@ -124,6 +134,7 @@ const l=[];S.users.forEach(u=>{const x=(u.usage||[]).find(x=>x.account===acc);if
 let pi=null;for(const u of S.users)if((u.pi_of||[]).includes(acc)){pi=u.user;break}return{cs:l,pi,partial:true}}
 
 function sortB(bs){const so={active:0,ending:1,over:2,expired:3};switch(S.sort){
+case"expiry":return bs.sort((a,b)=>dB(pD(a.end))-dB(pD(b.end)));
 case"availability":return bs.sort((a,b)=>(b.total-b.consumed)-(a.total-a.consumed));
 case"percent-asc":return bs.sort((a,b)=>a.percent-b.percent);
 case"percent-desc":return bs.sort((a,b)=>b.percent-a.percent);
@@ -136,9 +147,9 @@ const dd = cDD();
 document.getElementById("doomsday-container").innerHTML = dd ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.04);border-color:rgba(130,34,53,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:0;margin-bottom:20px;"><div><div style="color:var(--bad);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">⏳</span> Doomsday Clock</div><div style="font-size:12px;color:var(--ink-muted)">Estimated depletion of all remaining HPC allocations across the lab.</div></div><div style="text-align:right"><div style="font-family:'EB Garamond',Georgia,serif;font-size:24px;color:var(--ink);font-weight:500;line-height:1">${dd.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bad);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${Math.max(0,Math.ceil((dd.getTime()-Date.now())/864e5))} days left</div></div></div>` : '';
 document.getElementById("stats").innerHTML=`<div class="stat"><div class="stat-label">Projects</div><div class="stat-value tnum">${act}</div><div class="stat-sub">of ${all.length} · ${ov} over</div></div><div class="stat"><div class="stat-label">Members</div><div class="stat-value tnum">${S.users.length}</div><div class="stat-sub">reporting</div></div><div class="stat"><div class="stat-label">Running</div><div class="stat-value tnum" style="color:${run>0?'var(--good)':'var(--ink-muted)'}">${run}</div><div class="stat-sub">jobs on cluster</div></div><div class="stat"><div class="stat-label">Consumed</div><div class="stat-value tnum">${fH(tot)}</div><div class="stat-sub">core-hours</div></div>`;
 document.getElementById("ct-projects").textContent=all.length;document.getElementById("ct-members").textContent=S.users.length;
-document.getElementById("content").innerHTML=S.view==="projects"?rP():rM()}
+document.getElementById("content").innerHTML=S.view==="projects"?rP():S.view==="members"?rM():rF()}
 
-function rP(){const bs=sortB([...aB()]);if(!bs.length)return'<div class="loading">No projects yet.</div>';return`<div style="margin-top:20px">${bs.map(rPC).join("")}</div>`}
+function rP(){let bs=sortB([...aB()]);if(S.filterActive)bs=bs.filter(b=>{const k=pS(b).k;return k==="active"||k==="ending"});if(!bs.length)return'<div class="loading">No projects match.</div>';return`<div style="margin-top:20px">${bs.map(rPC).join("")}</div>`}
 
 function rPC(b){const{cs,pi,partial}=gC(b.account);cs.sort((a,c)=>c.hours-a.hours);const st=pS(b),tp=b.percent,rem=Math.max(0,b.total-b.consumed);
 let run=0;const segs=cs.filter(c=>c.hours>.1).map(c=>{const w=Math.min((c.hours/b.total)*100,100-run);run+=w;return{...c,wp:w}});
@@ -151,7 +162,7 @@ return`<article class="project-card"><div class="p-header"><div class="p-title">
 ${cs.length>0?`<div class="contributors"><div class="contrib-hed"><span>Contributors · ${cs.length}</span>${partial?`<span class="contrib-partial">partial</span>`:""}</div>${show.map((c,i)=>`<div class="contrib-row"><span class="contrib-rank">${i+1}</span><span class="contrib-swatch" style="background:${uc(c.user)}"></span><span class="contrib-name">${E(c.user)}${pi===c.user?'<span class="chip chip-pi">PI</span>':''}</span><span class="contrib-hours tnum">${fH(c.hours)} h</span><span class="contrib-jobs tnum">${fI(c.jobs)} jobs</span></div>`).join("")}${cs.length>5?`<button class="expand-toggle" onclick="tE('p-${E(b.account)}')">${exp?"Show top 5":`Show all ${cs.length}`}</button>`:""}</div>`:`<div class="contributors"><div class="contrib-hed"><span>No contributors reported</span></div></div>`}</article>`}
 
 function rM(){if(!S.users.length)return'<div class="loading">No members yet.</div>';const bm={};S.users.forEach(u=>u.budgets?.forEach(b=>{bm[b.account]=b}));
-const ws=S.users.map(u=>{const tk=(u.usage||[]).reduce((s,x)=>s+pH(x.consumed),0),tj=(u.usage||[]).reduce((s,x)=>s+(x.num_jobs||0),0);let ga=0;(u.pi_of||[]).forEach(a=>{const b=bm[a];if(b)ga+=b.consumed});return{u,tk,ga,tj}});sortM(ws);
+const ws=S.users.map(u=>{const tk=(u.usage||[]).reduce((s,x)=>s+pH(x.consumed),0),tj=(u.usage||[]).reduce((s,x)=>s+(x.num_jobs||0),0);let ga=0;(u.pi_of||[]).forEach(a=>{const b=bm[a];if(b)ga+=b.total});return{u,tk,ga,tj}});sortM(ws);
 return`<div style="margin-top:20px">${ws.map(rMC).join("")}</div>`}
 
 function rMC({u:user,tk:taken,ga:gathered,tj:totalJobs}){const rj=(user.jobs||[]).filter(j=>j.state==="RUNNING"),isPi=(user.pi_of||[]).length>0,net=gathered-taken,col=uc(user.user);
@@ -161,6 +172,57 @@ return`<article class="member-card"><div class="m-top"><div class="m-name-block"
 <div class="m-balance ${isPi?'':'non-pi'}"><div><div class="m-balance-label">Consumed</div><div class="m-balance-value tnum">${fH(taken)}</div><div class="m-balance-sub">core-hours · ${fI(totalJobs)} jobs</div></div>${isPi?`<div><div class="m-balance-label">Gathered</div><div class="m-balance-value tnum" style="color:var(--good)">${fH(gathered)}</div><div class="m-balance-sub">${user.pi_of.length} project${user.pi_of.length>1?'s':''}</div></div><div><div class="m-balance-label">Net</div><div class="m-balance-value tnum" style="color:${net>=0?'var(--good)':'var(--bad)'}">${net>=0?'+':''}${fH(Math.abs(net))}</div><div class="m-balance-sub">gathered − used</div></div>`:`<div><div class="m-balance-label">Projects</div><div class="m-balance-value tnum">${prjs.length}</div><div class="m-balance-sub">contributing to</div></div>`}</div>
 ${rj.length>0?`<div class="jobs-list"><div class="jobs-head"><span>ID</span><span>Name</span><span>State</span><span>Time</span><span>Nodes</span></div>${jts.map(j=>`<div class="job-row"><span style="color:var(--ink-muted)">${E(j.id)}</span><span class="job-name">${E(j.name)}</span><span class="state-pill state-${E(j.state)}"><span class="state-dot"></span>${E(j.state)}</span><span style="color:var(--ink-muted)">${E(j.time)}</span><span style="color:var(--ink-muted)">${E(j.nodes)}</span></div>`).join("")}${allj.length>3?`<button class="expand-toggle" onclick="tE('j-${E(user.user)}')">${ej?"Show top 3":`Show ${Math.min(allj.length,10)} of ${allj.length} jobs`}</button>`:""}</div>`:""}
 ${prjs.length>0?`<div style="margin-top:16px"><div class="contrib-hed" style="padding-bottom:6px;margin:0 0 8px"><span>Per-project consumption</span><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">${prjs.length}</span></div>${prjs.map(p=>{const h=pH(p.consumed);return`<div class="m-project-row"><div class="m-project-name-wrap"><span class="contrib-swatch" style="background:${col}"></span><span class="m-project-name">${E(p.account.replace("IscrC_",""))}</span>${(user.pi_of||[]).includes(p.account)?'<span class="chip chip-pi">PI</span>':''}</div><span class="contrib-hours tnum">${fH(h)} h</span><span class="contrib-jobs tnum">${fI(p.num_jobs)} jobs</span><div class="m-project-bar"><div class="m-project-bar-fill" style="width:${(h/mxH)*100}%;background:${col}"></div></div></div>`}).join("")}</div>`:""}</article>`}
+
+/* ============  FUN STATS TAB  ============ */
+function gatherStats(){return S.users.map(u=>{const tk=(u.usage||[]).reduce((s,x)=>s+pH(x.consumed),0),tj=(u.usage||[]).reduce((s,x)=>s+(x.num_jobs||0),0);return{name:u.user,hours:tk,jobs:tj,hpj:tj>0?tk/tj:Infinity,col:uc(u.user)}})}
+function medal(i){return i===0?"🥇":i===1?"🥈":i===2?"🥉":null}
+function lbHTML(title,sub,rows,valFmt){const mx=rows.length?Math.max(...rows.map(r=>r.val)):1;
+return`<div class="lb-section"><div class="lb-title">${title}</div><div class="lb-sub">${sub}</div>${rows.map((r,i)=>{const m=medal(i);return`<div class="lb-row"><span class="${m?'lb-medal':'lb-rank'}">${m||i+1}</span><span class="contrib-swatch" style="background:${r.col}"></span><span class="lb-name">${E(r.name)}</span><span class="lb-val">${valFmt(r.val)}</span><div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${(r.val/mx)*100}%;background:${r.col}"></div></div></div>`}).join("")}</div>`}
+function seedRng(str){let s=0;for(let i=0;i<str.length;i++)s=((s<<5)-s+str.charCodeAt(i))|0;return function(){s=s^(s<<13);s=s^(s>>17);s=s^(s<<5);return(s>>>0)/4294967296}}
+
+function rF(){
+if(!S.users.length)return'<div class="loading">No stats yet — need some members first.</div>';
+const st=gatherStats();
+const byJobs=[...st].sort((a,b)=>b.jobs-a.jobs);
+const byHours=[...st].sort((a,b)=>b.hours-a.hours);
+const bySpeed=[...st].filter(u=>u.jobs>0).sort((a,b)=>a.hpj-b.hpj);
+let html='<div style="margin-top:20px">';
+html+=lbHTML("Job Machine","who has submitted the most jobs",byJobs.map(u=>({name:u.name,val:u.jobs,col:u.col})),v=>fI(v)+" jobs");
+html+=lbHTML("Speed Demon","lowest hours per job — the burst masters",bySpeed.map(u=>({name:u.name,val:u.hpj,col:u.col})),v=>v.toFixed(2)+" h/job");
+html+=lbHTML("Hour Devourer","total core-hours consumed across all projects",byHours.map(u=>({name:u.name,val:u.hours,col:u.col})),v=>fH(v)+" h");
+html+=`<div class="lb-section"><div class="lb-title">SVD Mentions Per Day</div><div class="lb-sub">Totally real metric tracked by our monitoring infrastructure</div>
+<div class="svd-card"><canvas id="svd-canvas" height="220"></canvas>
+<div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
+html+='</div>';return html}
+
+function drawSVD(){
+const cv=document.getElementById("svd-canvas");if(!cv)return;
+const dpr=window.devicePixelRatio||1;const rect=cv.getBoundingClientRect();
+cv.width=rect.width*dpr;cv.height=220*dpr;
+const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);
+const W=rect.width,H=220,pad={t:16,b:28,l:40,r:16};
+const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+const days=30,st=gatherStats();
+ctx.strokeStyle="#c0b9a8";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,H-pad.b);ctx.lineTo(W-pad.r,H-pad.b);ctx.stroke();
+ctx.fillStyle="#8a8478";ctx.font="9px 'JetBrains Mono',monospace";ctx.textAlign="right";
+for(let i=0;i<=4;i++){const y=pad.t+ph*(1-i/4);ctx.fillText(Math.round(i*25/4*4),pad.l-6,y+3);
+if(i>0){ctx.save();ctx.strokeStyle="#ebe3ce";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.restore()}}
+ctx.textAlign="center";
+for(let d=0;d<days;d+=5){const x=pad.l+pw*(d/(days-1));ctx.fillText("d"+(d+1),x,H-pad.b+14)}
+st.forEach(u=>{
+const rng=seedRng(u.name+"svd2026");
+const pts=[];let base=8+rng()*14;
+for(let d=0;d<days;d++){base+=((rng()-.5)*4);base=Math.max(1,Math.min(24,base));
+const v=base+Math.sin(d*0.7+rng()*6)*3+Math.sin(d*0.3+rng()*4)*2+(rng()-.5)*1.5;
+pts.push(Math.max(0.5,Math.min(25,v)))}
+ctx.strokeStyle=u.col;ctx.lineWidth=2.2;ctx.lineJoin="round";ctx.beginPath();
+pts.forEach((v,i)=>{const x=pad.l+pw*(i/(days-1)),y=pad.t+ph*(1-v/25);
+if(i===0)ctx.moveTo(x,y);else{const px=pad.l+pw*((i-1)/(days-1)),py=pad.t+ph*(1-pts[i-1]/25);
+const cx1=px+(x-px)*.4,cx2=x-(x-px)*.4;ctx.bezierCurveTo(cx1,py,cx2,y,x,y)}});
+ctx.stroke()})}
+
+new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(drawSVD)}).observe(document.getElementById("content"),{childList:true});
 fetchData();
 </script>
 </body>
