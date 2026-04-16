@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>GLADIA × Leonardo — HPC Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e1117;
+    --card-bg: rgba(255, 255, 255, 0.03);
+    --border: rgba(255, 255, 255, 0.07);
+    --text-primary: rgba(255, 255, 255, 0.92);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    --bar-track: rgba(255, 255, 255, 0.06);
+    --accent: rgb(100, 160, 255);
+    --accent-bg: rgba(100, 160, 255, 0.12);
+    --good: rgb(50, 180, 120);
+    --warn: rgb(220, 160, 40);
+    --bad: rgb(220, 60, 60);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, sans-serif;
+    min-height: 100vh;
+    padding: 24px 20px;
+  }
+  .container { max-width: 860px; margin: 0 auto; }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+
+  header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
+  .logo-row { display: flex; align-items: center; gap: 8px; margin-bottom: 4px; }
+  .logo { font-family: 'JetBrains Mono', monospace; font-weight: 600; font-size: 13px; letter-spacing: 0.04em; color: var(--accent); }
+  .logo-sep, .logo-sub { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  h1 { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
+  .refresh-btn {
+    background: var(--accent-bg); border: 1px solid rgba(100,160,255,0.2);
+    color: var(--accent); border-radius: 8px; padding: 8px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .refresh-btn:hover { background: rgba(100,160,255,0.18); }
+
+  .banner {
+    background: rgba(220,160,40,0.08); border: 1px solid rgba(220,160,40,0.2);
+    border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;
+    font-size: 12px; color: rgb(220,180,80);
+  }
+
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat { background: var(--card-bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+  .stat-label { font-size: 10px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 4px; }
+  .stat-value { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; }
+
+  .view-toggle { display: flex; gap: 4px; margin-bottom: 18px; background: var(--card-bg); border-radius: 8px; padding: 3px; width: fit-content; }
+  .view-btn {
+    padding: 6px 16px; border-radius: 6px; border: none; background: transparent;
+    color: var(--text-muted); font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600; cursor: pointer; text-transform: capitalize;
+  }
+  .view-btn.active { background: var(--accent-bg); color: var(--accent); }
+
+  .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+
+  .user-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 8px; background: var(--accent-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: var(--accent);
+  }
+  .user-info { display: flex; align-items: center; gap: 10px; }
+  .username { font-weight: 600; font-size: 15px; }
+  .user-meta { font-size: 11px; color: var(--text-muted); }
+  .badge-running { padding: 3px 10px; border-radius: 99px; background: rgba(50,180,120,0.12); color: var(--good); font-size: 11px; font-weight: 600; }
+  .chevron { color: var(--text-muted); font-size: 18px; transition: transform 0.2s; }
+  .chevron.expanded { transform: rotate(180deg); }
+
+  .section-title {
+    font-size: 11px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px;
+  }
+
+  .jobs-grid, .jobs-header {
+    display: grid; grid-template-columns: 85px 1fr 95px 72px 52px;
+    gap: 6px; padding: 7px 0; border-bottom: 1px solid var(--border);
+    font-size: 12px; font-family: 'JetBrains Mono', monospace; align-items: center;
+  }
+  .jobs-header {
+    font-size: 10px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-muted);
+  }
+  .job-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 500; }
+  .state-pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px; border-radius: 99px;
+    font-size: 10px; font-weight: 600; width: fit-content;
+  }
+  .state-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+  .state-RUNNING { background: rgba(50,180,120,0.12); color: var(--good); }
+  .state-RUNNING .state-dot { background: var(--good); animation: pulse 2s infinite; }
+  .state-PENDING { background: rgba(220,160,40,0.12); color: var(--warn); }
+  .state-PENDING .state-dot { background: var(--warn); }
+  .state-FAILED { background: rgba(220,60,60,0.12); color: var(--bad); }
+  .state-FAILED .state-dot { background: var(--bad); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+  .budget-row { margin-bottom: 16px; }
+  .budget-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
+  .budget-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+  .budget-bar { position: relative; height: 8px; border-radius: 4px; background: var(--bar-track); overflow: hidden; }
+  .budget-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; transition: width 0.8s cubic-bezier(0.22,1,0.36,1); }
+  .budget-fill.user { background: var(--accent); opacity: 0.6; }
+  .budget-bottom { display: flex; justify-content: space-between; margin-top: 3px; font-size: 10px; color: var(--text-muted); }
+
+  .legend { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
+  .legend-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+  .leader-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .leader-user { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; width: 90px; }
+  .leader-bar-track { flex: 1; height: 6px; border-radius: 3px; background: var(--bar-track); overflow: hidden; }
+  .leader-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
+  .leader-hours { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); min-width: 80px; text-align: right; }
+  .leader-jobs { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-muted); min-width: 60px; text-align: right; }
+
+  .footer { text-align: center; font-size: 10px; color: var(--text-muted); margin-top: 24px; }
+  .loading { text-align: center; padding: 60px 20px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <div>
+      <div class="logo-row">
+        <span class="logo">GLADIA</span>
+        <span class="logo-sep">×</span>
+        <span class="logo-sub">LEONARDO</span>
+      </div>
+      <h1>HPC Cluster Console</h1>
+    </div>
+    <button class="refresh-btn" onclick="fetchData()">↻ Refresh</button>
+  </header>
+
+  <div id="banner"></div>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="view-toggle">
+    <button class="view-btn active" data-view="users" onclick="setView('users')">Users</button>
+    <button class="view-btn" data-view="projects" onclick="setView('projects')">Projects</button>
+  </div>
+
+  <div id="content"><div class="loading">Loading…</div></div>
+
+  <div class="footer" id="footer"></div>
+</div>
+
+<script>
+const REPO = "alexzilligmm/gladia-dashboard";
+
+let state = { users: [], projects: [], view: "users", expanded: {} };
+
+function parseHours(str) {
+  if (!str) return 0;
+  const p = str.split(":");
+  return parseInt(p[0] || 0) + parseInt(p[1] || 0) / 60;
+}
+function fmtHours(h) {
+  if (h >= 1000) return (h / 1000).toFixed(1) + "k h";
+  return Math.round(h) + " h";
+}
+function timeAgo(ts) {
+  const diff = Date.now() - new Date(ts).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 1) return "just now";
+  if (m < 60) return m + "m ago";
+  const h = Math.floor(m / 60);
+  if (h < 24) return h + "h ago";
+  return Math.floor(h / 24) + "d ago";
+}
+function daysUntil(end) {
+  const d = new Date(end.slice(0,4) + "-" + end.slice(4,6) + "-" + end.slice(6,8));
+  return Math.max(0, Math.ceil((d - Date.now()) / 86400000));
+}
+function barColor(pct) {
+  if (pct >= 100) return "var(--bad)";
+  if (pct >= 85)  return "var(--warn)";
+  return "var(--good)";
+}
+function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+
+async function fetchData() {
+  document.getElementById("content").innerHTML = '<div class="loading">Loading…</div>';
+  document.getElementById("banner").innerHTML = "";
+  let users = [], projects = [];
+  try {
+    // Fetch users
+    const dataList = await fetch(`https://api.github.com/repos/${REPO}/contents/data`);
+    if (dataList.ok) {
+      const files = (await dataList.json()).filter(f => f.name.endsWith(".json"));
+      users = await Promise.all(files.map(f => fetch(f.download_url).then(r => r.json())));
+    }
+    // Fetch projects (PI reports)
+    const projList = await fetch(`https://api.github.com/repos/${REPO}/contents/projects`);
+    if (projList.ok) {
+      const files = (await projList.json()).filter(f => f.name.endsWith(".json"));
+      projects = await Promise.all(files.map(f => fetch(f.download_url).then(r => r.json())));
+    }
+    if (users.length === 0 && projects.length === 0) {
+      document.getElementById("banner").innerHTML = '<div class="banner">No data yet — waiting for users to log into Leonardo and push their status.</div>';
+    }
+  } catch (e) {
+    document.getElementById("banner").innerHTML = `<div class="banner">Error fetching repo data: ${esc(e.message)}</div>`;
+  }
+  state.users = users;
+  state.projects = projects;
+  render();
+  document.getElementById("footer").textContent = `Last refresh: ${new Date().toLocaleTimeString()} · Data pushed on Leonardo login`;
+}
+
+function setView(v) {
+  state.view = v;
+  document.querySelectorAll(".view-btn").forEach(b => {
+    b.classList.toggle("active", b.dataset.view === v);
+  });
+  render();
+}
+
+function toggleUser(user) {
+  state.expanded[user] = !state.expanded[user];
+  render();
+}
+
+function render() {
+  // Stats
+  const totalJobs = state.users.reduce((s,u) => s + (u.jobs?.length || 0), 0);
+  const running = state.users.reduce((s,u) => s + (u.jobs?.filter(j => j.state === "RUNNING").length || 0), 0);
+  const budgetMap = {};
+  state.users.forEach(u => u.budgets?.forEach(b => { budgetMap[b.account] = b; }));
+  const over = Object.values(budgetMap).filter(b => b.percent >= 100).length;
+
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="stat-label">Members</div><div class="stat-value">${state.users.length}</div></div>
+    <div class="stat"><div class="stat-label">Total Jobs</div><div class="stat-value">${totalJobs}</div></div>
+    <div class="stat"><div class="stat-label">Running</div><div class="stat-value" style="color:var(--good)">${running}</div></div>
+    <div class="stat"><div class="stat-label">Over Budget</div><div class="stat-value" style="color:${over>0?'var(--bad)':'var(--good)'}">${over}</div></div>
+  `;
+
+  const content = document.getElementById("content");
+  if (state.view === "users") content.innerHTML = renderUsers();
+  else content.innerHTML = renderProjects();
+}
+
+function renderUsers() {
+  if (state.users.length === 0) return '<div class="loading">No users have pushed yet.</div>';
+  return state.users.map(u => {
+    const isOpen = state.expanded[u.user] !== false; // default expanded
+    const running = u.jobs?.filter(j => j.state === "RUNNING").length || 0;
+    const usageMap = {};
+    (u.usage || []).forEach(x => usageMap[x.account] = x);
+
+    return `
+      <div class="card">
+        <div class="user-header" onclick="toggleUser('${esc(u.user)}')">
+          <div class="user-info">
+            <div class="avatar">${esc(u.user.slice(0,2).toUpperCase())}</div>
+            <div>
+              <div class="username">${esc(u.user)}</div>
+              <div class="user-meta">${esc(u.hostname || "")} · ${timeAgo(u.timestamp)}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px">
+            ${running > 0 ? `<span class="badge-running">${running} running</span>` : ""}
+            <span class="chevron ${isOpen ? 'expanded' : ''}">▾</span>
+          </div>
+        </div>
+        ${isOpen ? `
+          <div style="margin-top:16px">
+            ${u.jobs?.length > 0 ? `
+              <div style="margin-bottom:20px">
+                <div class="section-title">Jobs</div>
+                <div class="jobs-header">
+                  <span>ID</span><span>Name</span><span>State</span><span>Time</span><span>Nodes</span>
+                </div>
+                ${u.jobs.map(j => `
+                  <div class="jobs-grid">
+                    <span style="color:var(--text-muted)">${esc(j.id)}</span>
+                    <span class="job-name">${esc(j.name)}</span>
+                    <span class="state-pill state-${esc(j.state)}"><span class="state-dot"></span>${esc(j.state)}</span>
+                    <span style="color:var(--text-muted)">${esc(j.time)}</span>
+                    <span style="color:var(--text-muted)">${esc(j.nodes)}N</span>
+                  </div>
+                `).join("")}
+              </div>` : ""}
+
+            ${u.budgets?.length > 0 ? `
+              <div>
+                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+                  <span class="section-title" style="margin-bottom:0">Project Budgets</span>
+                  <span class="legend">
+                    <span class="legend-dot" style="background:var(--accent);opacity:0.6"></span> your usage
+                    <span style="width:10px"></span>
+                    <span class="legend-dot" style="background:var(--text-muted);opacity:0.4"></span> project total
+                  </span>
+                </div>
+                ${u.budgets.map(b => {
+                  const usage = usageMap[b.account];
+                  const userH = usage ? parseHours(usage.consumed) : 0;
+                  const userPct = b.total > 0 ? userH / b.total * 100 : 0;
+                  const dl = daysUntil(b.end);
+                  return `
+                    <div class="budget-row">
+                      <div class="budget-top">
+                        <span class="budget-name">${esc(b.account.replace("IscrC_", ""))}</span>
+                        <div style="display:flex;gap:12px;align-items:baseline">
+                          <span style="font-size:11px;color:var(--text-muted)">${dl>0 ? dl+"d left" : "expired"}</span>
+                          <span class="mono" style="font-size:13px;font-weight:700;color:${barColor(b.percent)}">${b.percent.toFixed(1)}%</span>
+                        </div>
+                      </div>
+                      <div class="budget-bar">
+                        <div class="budget-fill" style="width:${Math.min(b.percent/1.2, 100)}%;background:${barColor(b.percent)}"></div>
+                        ${userPct > 0 ? `<div class="budget-fill user" style="width:${Math.min(userPct/1.2, 100)}%"></div>` : ""}
+                      </div>
+                      <div class="budget-bottom">
+                        <span>${b.consumed.toLocaleString()}h / ${b.total.toLocaleString()}h total</span>
+                        <span>
+                          ${userH > 0 ? `<span style="color:var(--accent);margin-right:8px">you: ${fmtHours(userH)} · ${usage.num_jobs} jobs</span>` : ""}
+                          ${b.percent >= 100 ? "OVER" : Math.max(0, b.total - b.consumed).toLocaleString() + "h left"}
+                        </span>
+                      </div>
+                    </div>
+                  `;
+                }).join("")}
+              </div>` : ""}
+          </div>
+        ` : ""}
+      </div>
+    `;
+  }).join("");
+}
+
+function renderProjects() {
+  // Merge budgets (from users) + PI-reported members (from projects)
+  const budgetMap = {};
+  state.users.forEach(u => u.budgets?.forEach(b => { budgetMap[b.account] = b; }));
+  const projectMap = {};
+  state.projects.forEach(p => { projectMap[p.account] = p; });
+
+  // Per-user usage across all projects (fallback if no PI report)
+  const userUsageMap = {};
+  state.users.forEach(u => {
+    (u.usage || []).forEach(x => {
+      if (!userUsageMap[x.account]) userUsageMap[x.account] = [];
+      userUsageMap[x.account].push({ user: u.user, hours: parseHours(x.consumed), jobs: x.num_jobs });
+    });
+  });
+
+  const accounts = [...new Set([...Object.keys(budgetMap), ...Object.keys(projectMap)])];
+  if (accounts.length === 0) return '<div class="loading">No projects yet.</div>';
+
+  return accounts.map(acc => {
+    const b = budgetMap[acc];
+    const p = projectMap[acc];
+
+    // Prefer PI-reported full member list; fall back to user-reported usage
+    let contributors = [];
+    if (p?.members) {
+      contributors = p.members.map(m => ({ user: m.user, hours: parseHours(m.consumed), jobs: m.num_jobs }));
+    } else if (userUsageMap[acc]) {
+      contributors = userUsageMap[acc];
+    }
+    contributors.sort((a, c) => c.hours - a.hours);
+
+    const pct = b?.percent ?? 0;
+    const dl = b ? daysUntil(b.end) : null;
+
+    return `
+      <div class="card">
+        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
+          <div>
+            <span class="mono" style="font-size:15px;font-weight:700">${esc(acc.replace("IscrC_", ""))}</span>
+            ${p?.pi ? `<span style="font-size:11px;color:var(--text-muted);margin-left:10px">PI: ${esc(p.pi)}</span>` : ""}
+          </div>
+          <div style="display:flex;gap:12px;align-items:baseline">
+            ${dl !== null ? `<span style="font-size:11px;color:var(--text-muted)">${dl>0?dl+"d left":"expired"}</span>` : ""}
+            ${b ? `<span class="mono" style="font-size:15px;font-weight:700;color:${barColor(pct)}">${pct.toFixed(1)}%</span>` : ""}
+          </div>
+        </div>
+        ${b ? `
+          <div class="budget-bar" style="height:10px;margin-bottom:6px">
+            <div class="budget-fill" style="width:${Math.min(pct/1.2, 100)}%;background:${barColor(pct)}"></div>
+          </div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">
+            ${b.consumed.toLocaleString()}h / ${b.total.toLocaleString()}h
+          </div>
+        ` : ""}
+        ${contributors.length > 0 ? `
+          <div class="section-title">
+            Leaderboard ${p ? "" : "(partial — no PI report)"}
+          </div>
+          ${(() => {
+            const max = Math.max(...contributors.map(c => c.hours));
+            return contributors.map((c, i) => `
+              <div class="leader-row">
+                <span class="leader-user">${i < 3 ? ["🥇","🥈","🥉"][i] + " " : ""}${esc(c.user)}</span>
+                <div class="leader-bar-track">
+                  <div class="leader-bar-fill" style="width:${max>0 ? (c.hours/max*100).toFixed(1) : 0}%"></div>
+                </div>
+                <span class="leader-hours">${fmtHours(c.hours)}</span>
+                <span class="leader-jobs">${c.jobs} jobs</span>
+              </div>
+            `).join("");
+          })()}
+        ` : '<div style="font-size:11px;color:var(--text-muted)">No usage data yet.</div>'}
+      </div>
+    `;
+  }).join("");
+}
+
+fetchData();
+</script>
+</body>
+</html>
