@@ -84,17 +84,51 @@ function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;"
 // Calculates the global Doomsday date by finding the Total Remaining / Total Lab Depletion Rate
 function cDD() {
   const n = Date.now();
-  let r = 0, v = 0;
+  let active = [];
   aB().forEach(b => {
     const s = pS(b);
     if (s.k === "active" || s.k === "ending") {
-      const d = Math.max(1, (n - pD(b.start).getTime()) / 864e5); // days elapsed
-      r += Math.max(0, b.total - b.consumed); // total remaining quota
-      v += b.consumed / d; // depletion rate (quota used per day)
+      const days_elapsed = Math.max(1, (n - pD(b.start).getTime()) / 864e5);
+      const v = b.consumed / days_elapsed; // rate: core-hrs/day
+      const r = Math.max(0, b.total - b.consumed); // remaining quota
+      const e = (pD(b.end).getTime() - n) / 864e5; // days until hard expiration
+      if (v > 0 && r > 0 && e > 0) active.push({ r, v, e });
     }
   });
-  if (v <= 0 || r <= 0) return null;
-  return new Date(n + (r / v) * 864e5);
+  if (!active.length) return null;
+
+  let t = 0;
+  while (active.length > 0) {
+    // Find the time delta (dt) to the very next budget death
+    let dt = Infinity;
+    let min_i = -1;
+    let spilled_v = 0;
+    for (let i = 0; i < active.length; i++) {
+      let curr = active[i];
+      const ttd = Math.min(curr.r / curr.v, curr.e - t);
+      if (ttd > 0 && ttd < dt) {
+        dt = ttd;
+        min_i = i;
+        spilled_v = curr.v;
+      }
+    }
+    
+    if (dt === Infinity || dt <= 0) break;
+    t += dt;
+    active.splice(min_i, 1);
+    let max_i = -1;
+    let curr_max_r = -1;
+    for (let i = 0; i < active.length; i++) {
+      let curr = active[i];
+      curr.r = curr.r - curr.v * dt;
+      if (curr_max_r < curr.r) {
+        curr_max_r = curr.r;
+        max_i = i;
+      }
+    }
+    active[max_i].v += spilled_v;
+  }
+  return new Date(n + t);
 }
 const R="alexzilligmm/gladia-dashboard",UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
