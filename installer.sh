@@ -39,8 +39,14 @@ if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
   echo ""
 fi
 
+if [ -z "$TOKEN" ]; then
+  read -p " GitHub token: " TOKEN
+fi
+
 # ---------- PI Projects ----------
-if [ -n "$EXISTING_PI" ]; then
+if [ -n "$PI_PROJECTS" ]; then
+  :  # already set via env
+elif [ -n "$EXISTING_PI" ]; then
   echo " Current PI projects: $EXISTING_PI"
   read -p " PI projects (Enter to keep, new list to replace, '-' to clear): " PI_INPUT
   if [ "$PI_INPUT" = "-" ]; then
