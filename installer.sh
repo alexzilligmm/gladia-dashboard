@@ -255,10 +255,17 @@ hpc-rmproject() {
   echo "  Current: ${HPC_PI_PROJECTS:-none}"
 }
 
-alias hpc-push='_hpc_push &>/dev/null & echo "Pushing in background (~1-2 min)..."'
+hpc-push() {
+  ( _hpc_push ) </dev/null >/dev/null 2>&1 &
+  disown $! 2>/dev/null
+  echo "Pushing in background (~1-2 min)..."
+}
 
-# Auto-push on every shell startup (non-blocking)
-_hpc_push &>/dev/null &
+# Auto-push on every interactive shell startup (non-blocking, survives shell exit)
+if [[ $- == *i* ]]; then
+  ( _hpc_push ) </dev/null >/dev/null 2>&1 &
+  disown $! 2>/dev/null
+fi
 HPC_PUSH_FUNCTIONS
 
 cat >> "$BASHRC" <<EOF
@@ -272,6 +279,10 @@ echo " ✓ Permissions: 600"
 echo ""
 echo " Sourcing bashrc..."
 source "$BASHRC"
+
+echo " Running initial push..."
+_hpc_push
+echo " ✓ Initial push complete"
 
 
 echo ""
