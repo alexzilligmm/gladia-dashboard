@@ -10,16 +10,22 @@
 <style>
   :root {
     --bg: #0e1117;
-    --card-bg: rgba(255, 255, 255, 0.03);
-    --border: rgba(255, 255, 255, 0.07);
-    --text-primary: rgba(255, 255, 255, 0.92);
-    --text-muted: rgba(255, 255, 255, 0.4);
-    --bar-track: rgba(255, 255, 255, 0.06);
-    --accent: rgb(100, 160, 255);
-    --accent-bg: rgba(100, 160, 255, 0.12);
-    --good: rgb(50, 180, 120);
-    --warn: rgb(220, 160, 40);
-    --bad: rgb(220, 60, 60);
+    --card-bg: rgba(255,255,255,0.03);
+    --card-bg-hover: rgba(255,255,255,0.05);
+    --border: rgba(255,255,255,0.07);
+    --text-primary: rgba(255,255,255,0.92);
+    --text-secondary: rgba(255,255,255,0.65);
+    --text-muted: rgba(255,255,255,0.4);
+    --bar-track: rgba(255,255,255,0.06);
+    --accent: rgb(100,160,255);
+    --accent-strong: rgb(120,180,255);
+    --accent-bg: rgba(100,160,255,0.12);
+    --you: rgb(100,160,255);
+    --others: rgba(150,150,160,0.55);
+    --good: rgb(80,200,140);
+    --warn: rgb(230,170,60);
+    --bad: rgb(230,90,90);
+    --expired: rgba(180,180,180,0.35);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -28,8 +34,9 @@
     font-family: 'Inter', -apple-system, sans-serif;
     min-height: 100vh;
     padding: 24px 20px;
+    font-size: 14px;
   }
-  .container { max-width: 860px; margin: 0 auto; }
+  .container { max-width: 880px; margin: 0 auto; }
   .mono { font-family: 'JetBrains Mono', monospace; }
 
   header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
@@ -46,9 +53,9 @@
   .refresh-btn:hover { background: rgba(100,160,255,0.18); }
 
   .banner {
-    background: rgba(220,160,40,0.08); border: 1px solid rgba(220,160,40,0.2);
+    background: rgba(230,170,60,0.08); border: 1px solid rgba(230,170,60,0.2);
     border-radius: 8px; padding: 10px 14px; margin-bottom: 16px;
-    font-size: 12px; color: rgb(220,180,80);
+    font-size: 12px; color: rgb(230,190,80);
   }
 
   .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
@@ -68,25 +75,38 @@
 
   .user-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
   .avatar {
-    width: 36px; height: 36px; border-radius: 8px; background: var(--accent-bg);
+    width: 38px; height: 38px; border-radius: 9px; background: var(--accent-bg);
     display: flex; align-items: center; justify-content: center;
     font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 15px; color: var(--accent);
   }
-  .user-info { display: flex; align-items: center; gap: 10px; }
+  .user-info { display: flex; align-items: center; gap: 12px; }
   .username { font-weight: 600; font-size: 15px; }
   .user-meta { font-size: 11px; color: var(--text-muted); }
-  .badge-running { padding: 3px 10px; border-radius: 99px; background: rgba(50,180,120,0.12); color: var(--good); font-size: 11px; font-weight: 600; }
-  .chevron { color: var(--text-muted); font-size: 18px; transition: transform 0.2s; }
+  .badge-running { padding: 3px 10px; border-radius: 99px; background: rgba(80,200,140,0.14); color: var(--good); font-size: 11px; font-weight: 600; }
+  .chevron { color: var(--text-muted); font-size: 18px; transition: transform 0.2s; user-select: none; }
   .chevron.expanded { transform: rotate(180deg); }
 
   .section-title {
     font-size: 11px; font-weight: 600; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px;
+    letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 10px;
   }
 
+  /* Status chips */
+  .status-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 9px; border-radius: 99px;
+    font-size: 10px; font-weight: 600; letter-spacing: 0.02em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .status-active { background: rgba(80,200,140,0.12); color: var(--good); }
+  .status-ending { background: rgba(230,170,60,0.12); color: var(--warn); }
+  .status-expired { background: rgba(180,180,180,0.08); color: var(--text-muted); }
+  .status-overquota { background: rgba(230,90,90,0.12); color: var(--bad); }
+
+  /* Jobs */
   .jobs-grid, .jobs-header {
-    display: grid; grid-template-columns: 85px 1fr 95px 72px 52px;
-    gap: 6px; padding: 7px 0; border-bottom: 1px solid var(--border);
+    display: grid; grid-template-columns: 85px 1fr 100px 72px 52px;
+    gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border);
     font-size: 12px; font-family: 'JetBrains Mono', monospace; align-items: center;
   }
   .jobs-header {
@@ -100,27 +120,51 @@
     font-size: 10px; font-weight: 600; width: fit-content;
   }
   .state-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-  .state-RUNNING { background: rgba(50,180,120,0.12); color: var(--good); }
+  .state-RUNNING { background: rgba(80,200,140,0.12); color: var(--good); }
   .state-RUNNING .state-dot { background: var(--good); animation: pulse 2s infinite; }
-  .state-PENDING { background: rgba(220,160,40,0.12); color: var(--warn); }
+  .state-PENDING { background: rgba(230,170,60,0.12); color: var(--warn); }
   .state-PENDING .state-dot { background: var(--warn); }
-  .state-FAILED { background: rgba(220,60,60,0.12); color: var(--bad); }
+  .state-FAILED { background: rgba(230,90,90,0.12); color: var(--bad); }
   .state-FAILED .state-dot { background: var(--bad); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
-  .budget-row { margin-bottom: 16px; }
-  .budget-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px; }
-  .budget-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
-  .budget-bar { position: relative; height: 8px; border-radius: 4px; background: var(--bar-track); overflow: hidden; }
-  .budget-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 4px; transition: width 0.8s cubic-bezier(0.22,1,0.36,1); }
-  .budget-fill.user { background: var(--accent); opacity: 0.6; }
-  .budget-bottom { display: flex; justify-content: space-between; margin-top: 3px; font-size: 10px; color: var(--text-muted); }
+  /* Project blocks */
+  .project-block { padding: 14px 0; border-top: 1px solid var(--border); }
+  .project-block:first-of-type { border-top: none; padding-top: 6px; }
+  .project-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; flex-wrap: wrap; }
+  .project-name-row { display: flex; align-items: center; gap: 8px; }
+  .project-name { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 600; letter-spacing: 0.02em; }
+  .pi-badge {
+    display: inline-flex; align-items: center;
+    padding: 1px 7px; border-radius: 4px;
+    background: rgba(100,160,255,0.15); color: var(--accent);
+    font-family: 'JetBrains Mono', monospace; font-size: 9px; font-weight: 700; letter-spacing: 0.1em;
+  }
+  .project-right { display: flex; align-items: center; gap: 10px; }
+  .project-percent { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; }
 
-  .legend { font-size: 10px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; }
-  .legend-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  /* Segmented bar */
+  .seg-bar {
+    position: relative; height: 9px; border-radius: 5px;
+    background: var(--bar-track); overflow: hidden; display: flex;
+  }
+  .seg { height: 100%; transition: width 0.6s cubic-bezier(0.22,1,0.36,1); }
+  .seg-you { background: var(--you); }
+  .seg-others { background: var(--others); }
+  .seg-overquota { background: var(--bad); opacity: 0.6; }
 
+  .bar-footer {
+    display: flex; justify-content: space-between; margin-top: 5px;
+    font-size: 11px; color: var(--text-muted); gap: 8px; flex-wrap: wrap;
+  }
+  .footer-left { display: flex; gap: 10px; flex-wrap: wrap; }
+  .legend-item { display: inline-flex; align-items: center; gap: 5px; }
+  .legend-swatch { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+
+  /* Leaderboard */
   .leader-row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
-  .leader-user { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; width: 90px; }
+  .leader-rank { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); width: 20px; text-align: right; }
+  .leader-user { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 500; width: 100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .leader-bar-track { flex: 1; height: 6px; border-radius: 3px; background: var(--bar-track); overflow: hidden; }
   .leader-bar-fill { height: 100%; border-radius: 3px; background: var(--accent); }
   .leader-hours { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--accent); min-width: 80px; text-align: right; }
@@ -154,22 +198,22 @@
   </div>
 
   <div id="content"><div class="loading">Loading…</div></div>
-
   <div class="footer" id="footer"></div>
 </div>
 
 <script>
 const REPO = "alexzilligmm/gladia-dashboard";
-
 let state = { users: [], projects: [], view: "users", expanded: {} };
 
+/* ---------- helpers ---------- */
 function parseHours(str) {
   if (!str) return 0;
-  const p = str.split(":");
-  return parseInt(p[0] || 0) + parseInt(p[1] || 0) / 60;
+  const p = String(str).split(":");
+  return parseInt(p[0] || 0) + parseInt(p[1] || 0) / 60 + parseInt(p[2] || 0) / 3600;
 }
 function fmtHours(h) {
-  if (h >= 1000) return (h / 1000).toFixed(1) + "k h";
+  if (h >= 10000) return (h/1000).toFixed(0) + "k h";
+  if (h >= 1000) return (h/1000).toFixed(1) + "k h";
   return Math.round(h) + " h";
 }
 function timeAgo(ts) {
@@ -181,35 +225,47 @@ function timeAgo(ts) {
   if (h < 24) return h + "h ago";
   return Math.floor(h / 24) + "d ago";
 }
-function daysUntil(end) {
-  const d = new Date(end.slice(0,4) + "-" + end.slice(4,6) + "-" + end.slice(6,8));
-  return Math.max(0, Math.ceil((d - Date.now()) / 86400000));
+function parseDate(yyyymmdd) {
+  return new Date(yyyymmdd.slice(0,4) + "-" + yyyymmdd.slice(4,6) + "-" + yyyymmdd.slice(6,8));
 }
-function barColor(pct) {
+function daysBetween(date) {
+  return Math.ceil((date - Date.now()) / 86400000);
+}
+function projectStatus(budget) {
+  const end = parseDate(budget.end);
+  const days = daysBetween(end);
+  const overQuota = budget.percent >= 100;
+
+  if (days < 0) return { key: "expired", label: `ended ${-days}d ago`, chip: "status-expired" };
+  if (overQuota) return { key: "overquota", label: `${days}d left · over quota`, chip: "status-overquota" };
+  if (days < 30) return { key: "ending", label: `${days}d left`, chip: "status-ending" };
+  return { key: "active", label: `${days}d left`, chip: "status-active" };
+}
+function percentColor(pct) {
   if (pct >= 100) return "var(--bad)";
-  if (pct >= 85)  return "var(--warn)";
+  if (pct >= 90)  return "var(--warn)";
+  if (pct >= 70)  return "var(--good)";
   return "var(--good)";
 }
 function esc(s) { return String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
 
+/* ---------- fetch ---------- */
 async function fetchData() {
   document.getElementById("content").innerHTML = '<div class="loading">Loading…</div>';
   document.getElementById("banner").innerHTML = "";
   let users = [], projects = [];
   try {
-    // Fetch users
     const dataList = await fetch(`https://api.github.com/repos/${REPO}/contents/data`);
     if (dataList.ok) {
       const files = (await dataList.json()).filter(f => f.name.endsWith(".json"));
       users = await Promise.all(files.map(f => fetch(f.download_url).then(r => r.json())));
     }
-    // Fetch projects (PI reports)
     const projList = await fetch(`https://api.github.com/repos/${REPO}/contents/projects`);
     if (projList.ok) {
       const files = (await projList.json()).filter(f => f.name.endsWith(".json"));
       projects = await Promise.all(files.map(f => fetch(f.download_url).then(r => r.json())));
     }
-    if (users.length === 0 && projects.length === 0) {
+    if (users.length === 0) {
       document.getElementById("banner").innerHTML = '<div class="banner">No data yet — waiting for users to log into Leonardo and push their status.</div>';
     }
   } catch (e) {
@@ -218,49 +274,64 @@ async function fetchData() {
   state.users = users;
   state.projects = projects;
   render();
-  document.getElementById("footer").textContent = `Last refresh: ${new Date().toLocaleTimeString()} · Data pushed on Leonardo login`;
+  document.getElementById("footer").textContent =
+    `Last refresh: ${new Date().toLocaleTimeString()} · Data pushed on Leonardo login`;
 }
 
 function setView(v) {
   state.view = v;
-  document.querySelectorAll(".view-btn").forEach(b => {
-    b.classList.toggle("active", b.dataset.view === v);
-  });
+  document.querySelectorAll(".view-btn").forEach(b => b.classList.toggle("active", b.dataset.view === v));
   render();
 }
-
 function toggleUser(user) {
-  state.expanded[user] = !state.expanded[user];
+  state.expanded[user] = !(state.expanded[user] !== false ? true : false);
   render();
 }
 
+/* ---------- render ---------- */
 function render() {
-  // Stats
-  const totalJobs = state.users.reduce((s,u) => s + (u.jobs?.length || 0), 0);
-  const running = state.users.reduce((s,u) => s + (u.jobs?.filter(j => j.state === "RUNNING").length || 0), 0);
+  // Stats — note: only count budgets from one user per project, to avoid double counting
   const budgetMap = {};
   state.users.forEach(u => u.budgets?.forEach(b => { budgetMap[b.account] = b; }));
-  const over = Object.values(budgetMap).filter(b => b.percent >= 100).length;
+  const allBudgets = Object.values(budgetMap);
+
+  const active = allBudgets.filter(b => projectStatus(b).key === "active" || projectStatus(b).key === "ending" || projectStatus(b).key === "overquota").length;
+  const overQuota = allBudgets.filter(b => b.percent >= 100 && daysBetween(parseDate(b.end)) >= 0).length;
+  const totalJobs = state.users.reduce((s,u) => s + (u.jobs?.length || 0), 0);
+  const running = state.users.reduce((s,u) => s + (u.jobs?.filter(j => j.state === "RUNNING").length || 0), 0);
 
   document.getElementById("stats").innerHTML = `
     <div class="stat"><div class="stat-label">Members</div><div class="stat-value">${state.users.length}</div></div>
-    <div class="stat"><div class="stat-label">Total Jobs</div><div class="stat-value">${totalJobs}</div></div>
-    <div class="stat"><div class="stat-label">Running</div><div class="stat-value" style="color:var(--good)">${running}</div></div>
-    <div class="stat"><div class="stat-label">Over Budget</div><div class="stat-value" style="color:${over>0?'var(--bad)':'var(--good)'}">${over}</div></div>
+    <div class="stat"><div class="stat-label">Active Projects</div><div class="stat-value">${active}</div></div>
+    <div class="stat"><div class="stat-label">Running Jobs</div><div class="stat-value" style="color:var(--good)">${running}</div></div>
+    <div class="stat"><div class="stat-label">Over Quota</div><div class="stat-value" style="color:${overQuota>0?'var(--bad)':'var(--text-primary)'}">${overQuota}</div></div>
   `;
 
   const content = document.getElementById("content");
-  if (state.view === "users") content.innerHTML = renderUsers();
-  else content.innerHTML = renderProjects();
+  content.innerHTML = state.view === "users" ? renderUsers() : renderProjects();
 }
 
+/* ---------- users view ---------- */
 function renderUsers() {
   if (state.users.length === 0) return '<div class="loading">No users have pushed yet.</div>';
+
+  // Build PI map from project.json files
+  const piMap = {};
+  state.projects.forEach(p => { if (p.pi) piMap[p.account] = p.pi; });
+
   return state.users.map(u => {
-    const isOpen = state.expanded[u.user] !== false; // default expanded
+    const isOpen = state.expanded[u.user] !== false; // default open
     const running = u.jobs?.filter(j => j.state === "RUNNING").length || 0;
+
+    // Map usage by account
     const usageMap = {};
     (u.usage || []).forEach(x => usageMap[x.account] = x);
+
+    // Sort projects: active first, then ending, over-quota, expired last
+    const sortedBudgets = [...(u.budgets || [])].sort((a, b) => {
+      const order = { active: 0, ending: 1, overquota: 2, expired: 3 };
+      return order[projectStatus(a).key] - order[projectStatus(b).key];
+    });
 
     return `
       <div class="card">
@@ -277,6 +348,7 @@ function renderUsers() {
             <span class="chevron ${isOpen ? 'expanded' : ''}">▾</span>
           </div>
         </div>
+
         ${isOpen ? `
           <div style="margin-top:16px">
             ${u.jobs?.length > 0 ? `
@@ -296,44 +368,10 @@ function renderUsers() {
                 `).join("")}
               </div>` : ""}
 
-            ${u.budgets?.length > 0 ? `
+            ${sortedBudgets.length > 0 ? `
               <div>
-                <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-                  <span class="section-title" style="margin-bottom:0">Project Budgets</span>
-                  <span class="legend">
-                    <span class="legend-dot" style="background:var(--accent);opacity:0.6"></span> your usage
-                    <span style="width:10px"></span>
-                    <span class="legend-dot" style="background:var(--text-muted);opacity:0.4"></span> project total
-                  </span>
-                </div>
-                ${u.budgets.map(b => {
-                  const usage = usageMap[b.account];
-                  const userH = usage ? parseHours(usage.consumed) : 0;
-                  const userPct = b.total > 0 ? userH / b.total * 100 : 0;
-                  const dl = daysUntil(b.end);
-                  return `
-                    <div class="budget-row">
-                      <div class="budget-top">
-                        <span class="budget-name">${esc(b.account.replace("IscrC_", ""))}</span>
-                        <div style="display:flex;gap:12px;align-items:baseline">
-                          <span style="font-size:11px;color:var(--text-muted)">${dl>0 ? dl+"d left" : "expired"}</span>
-                          <span class="mono" style="font-size:13px;font-weight:700;color:${barColor(b.percent)}">${b.percent.toFixed(1)}%</span>
-                        </div>
-                      </div>
-                      <div class="budget-bar">
-                        <div class="budget-fill" style="width:${Math.min(b.percent/1.2, 100)}%;background:${barColor(b.percent)}"></div>
-                        ${userPct > 0 ? `<div class="budget-fill user" style="width:${Math.min(userPct/1.2, 100)}%"></div>` : ""}
-                      </div>
-                      <div class="budget-bottom">
-                        <span>${b.consumed.toLocaleString()}h / ${b.total.toLocaleString()}h total</span>
-                        <span>
-                          ${userH > 0 ? `<span style="color:var(--accent);margin-right:8px">you: ${fmtHours(userH)} · ${usage.num_jobs} jobs</span>` : ""}
-                          ${b.percent >= 100 ? "OVER" : Math.max(0, b.total - b.consumed).toLocaleString() + "h left"}
-                        </span>
-                      </div>
-                    </div>
-                  `;
-                }).join("")}
+                <div class="section-title">Projects</div>
+                ${sortedBudgets.map(b => renderProjectBlock(b, usageMap[b.account], u.user, piMap[b.account])).join("")}
               </div>` : ""}
           </div>
         ` : ""}
@@ -342,14 +380,75 @@ function renderUsers() {
   }).join("");
 }
 
+/* Project block showing personal usage slice */
+function renderProjectBlock(b, usage, currentUser, pi) {
+  const status = projectStatus(b);
+  const userHours = usage ? parseHours(usage.consumed) : 0;
+  const userPctOfTotal = b.total > 0 ? (userHours / b.total * 100) : 0;
+  const totalPct = b.percent;
+  const othersPct = Math.max(0, totalPct - userPctOfTotal);
+  const isPi = pi === currentUser;
+
+  // Cap visual widths at 100%
+  const youWidth = Math.min(userPctOfTotal, 100);
+  const othersWidth = Math.min(othersPct, 100 - youWidth);
+  const overquotaWidth = totalPct > 100 ? Math.min((totalPct - 100), 20) : 0; // show slight overflow effect
+
+  const youLabel = isPi ? "taken" : "you";
+  const othersLabel = isPi ? "donated" : "others";
+
+  return `
+    <div class="project-block">
+      <div class="project-top">
+        <div class="project-name-row">
+          <span class="project-name">${esc(b.account.replace("IscrC_", ""))}</span>
+          ${isPi ? '<span class="pi-badge">PI</span>' : ''}
+          <span class="status-chip ${status.chip}">${status.label}</span>
+        </div>
+        <div class="project-right">
+          <span class="project-percent" style="color:${percentColor(totalPct)}">${totalPct.toFixed(1)}%</span>
+        </div>
+      </div>
+
+      <div class="seg-bar">
+        <div class="seg seg-you" style="width:${youWidth}%"></div>
+        <div class="seg seg-others" style="width:${othersWidth}%"></div>
+        ${overquotaWidth > 0 ? `<div class="seg seg-overquota" style="width:${overquotaWidth}%"></div>` : ""}
+      </div>
+
+      <div class="bar-footer">
+        <div class="footer-left">
+          ${userHours > 0 ? `
+            <span class="legend-item">
+              <span class="legend-swatch" style="background:var(--you)"></span>
+              ${youLabel}: <span class="mono" style="color:var(--accent)">${fmtHours(userHours)}</span>
+              ${usage?.num_jobs ? `<span style="color:var(--text-muted)">(${usage.num_jobs} jobs)</span>` : ""}
+            </span>
+          ` : ""}
+          ${othersPct > 0.5 ? `
+            <span class="legend-item">
+              <span class="legend-swatch" style="background:var(--others)"></span>
+              ${othersLabel}: <span class="mono">${fmtHours(b.total * othersPct / 100)}</span>
+            </span>
+          ` : ""}
+        </div>
+        <span>${b.consumed.toLocaleString()}h / ${b.total.toLocaleString()}h</span>
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- projects view ---------- */
 function renderProjects() {
-  // Merge budgets (from users) + PI-reported members (from projects)
+  // Build authoritative budget map (from saldo -b, any user suffices)
   const budgetMap = {};
   state.users.forEach(u => u.budgets?.forEach(b => { budgetMap[b.account] = b; }));
+
+  // PI-reported full member lists
   const projectMap = {};
   state.projects.forEach(p => { projectMap[p.account] = p; });
 
-  // Per-user usage across all projects (fallback if no PI report)
+  // Partial usage from user.json (if no PI report)
   const userUsageMap = {};
   state.users.forEach(u => {
     (u.usage || []).forEach(x => {
@@ -361,59 +460,83 @@ function renderProjects() {
   const accounts = [...new Set([...Object.keys(budgetMap), ...Object.keys(projectMap)])];
   if (accounts.length === 0) return '<div class="loading">No projects yet.</div>';
 
+  // Sort by status then percent desc
+  accounts.sort((a, c) => {
+    const ba = budgetMap[a], bc = budgetMap[c];
+    if (!ba) return 1; if (!bc) return -1;
+    const sa = projectStatus(ba), sc = projectStatus(bc);
+    const order = { active: 0, ending: 1, overquota: 2, expired: 3 };
+    if (order[sa.key] !== order[sc.key]) return order[sa.key] - order[sc.key];
+    return bc.percent - ba.percent;
+  });
+
   return accounts.map(acc => {
     const b = budgetMap[acc];
     const p = projectMap[acc];
 
-    // Prefer PI-reported full member list; fall back to user-reported usage
     let contributors = [];
+    let isPartial = false;
     if (p?.members) {
       contributors = p.members.map(m => ({ user: m.user, hours: parseHours(m.consumed), jobs: m.num_jobs }));
     } else if (userUsageMap[acc]) {
       contributors = userUsageMap[acc];
+      isPartial = true;
     }
     contributors.sort((a, c) => c.hours - a.hours);
 
+    const status = b ? projectStatus(b) : null;
     const pct = b?.percent ?? 0;
-    const dl = b ? daysUntil(b.end) : null;
+    const maxHours = contributors.length > 0 ? Math.max(...contributors.map(c => c.hours)) : 0;
+    const knownHours = contributors.reduce((s,c) => s + c.hours, 0);
+    const unknownHours = b ? Math.max(0, b.consumed - knownHours) : 0;
 
     return `
       <div class="card">
-        <div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px">
-          <div>
+        <div class="project-top" style="margin-bottom:12px">
+          <div class="project-name-row">
             <span class="mono" style="font-size:15px;font-weight:700">${esc(acc.replace("IscrC_", ""))}</span>
-            ${p?.pi ? `<span style="font-size:11px;color:var(--text-muted);margin-left:10px">PI: ${esc(p.pi)}</span>` : ""}
+            ${p?.pi ? `<span style="font-size:11px;color:var(--text-muted)">PI: <span class="mono" style="color:var(--text-secondary)">${esc(p.pi)}</span></span>` : ""}
+            ${status ? `<span class="status-chip ${status.chip}">${status.label}</span>` : ""}
           </div>
-          <div style="display:flex;gap:12px;align-items:baseline">
-            ${dl !== null ? `<span style="font-size:11px;color:var(--text-muted)">${dl>0?dl+"d left":"expired"}</span>` : ""}
-            ${b ? `<span class="mono" style="font-size:15px;font-weight:700;color:${barColor(pct)}">${pct.toFixed(1)}%</span>` : ""}
-          </div>
+          ${b ? `<span class="mono" style="font-size:15px;font-weight:700;color:${percentColor(pct)}">${pct.toFixed(1)}%</span>` : ""}
         </div>
         ${b ? `
-          <div class="budget-bar" style="height:10px;margin-bottom:6px">
-            <div class="budget-fill" style="width:${Math.min(pct/1.2, 100)}%;background:${barColor(pct)}"></div>
+          <div class="seg-bar" style="height:10px;border-radius:5px">
+            <div class="seg" style="width:${Math.min(pct, 100)}%;background:${percentColor(pct)}"></div>
           </div>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">
-            ${b.consumed.toLocaleString()}h / ${b.total.toLocaleString()}h
+          <div class="bar-footer" style="margin-bottom:16px">
+            <span>${b.consumed.toLocaleString()}h consumed · ${Math.max(0, b.total - b.consumed).toLocaleString()}h remaining</span>
+            <span>of ${b.total.toLocaleString()}h</span>
           </div>
         ` : ""}
+
         ${contributors.length > 0 ? `
-          <div class="section-title">
-            Leaderboard ${p ? "" : "(partial — no PI report)"}
+          <div class="section-title" style="display:flex;justify-content:space-between;align-items:baseline">
+            <span>Leaderboard</span>
+            ${isPartial ? '<span style="font-size:9px;text-transform:none;letter-spacing:0;color:var(--text-muted)">partial — PI not reporting</span>' : ''}
           </div>
-          ${(() => {
-            const max = Math.max(...contributors.map(c => c.hours));
-            return contributors.map((c, i) => `
-              <div class="leader-row">
-                <span class="leader-user">${i < 3 ? ["🥇","🥈","🥉"][i] + " " : ""}${esc(c.user)}</span>
-                <div class="leader-bar-track">
-                  <div class="leader-bar-fill" style="width:${max>0 ? (c.hours/max*100).toFixed(1) : 0}%"></div>
-                </div>
-                <span class="leader-hours">${fmtHours(c.hours)}</span>
-                <span class="leader-jobs">${c.jobs} jobs</span>
+          ${contributors.map((c, i) => `
+            <div class="leader-row">
+              <span class="leader-rank">${i+1}</span>
+              <span class="leader-user">${i < 3 ? ["🥇","🥈","🥉"][i] + " " : ""}${esc(c.user)}${p?.pi === c.user ? ' <span class="pi-badge" style="margin-left:4px">PI</span>' : ''}</span>
+              <div class="leader-bar-track">
+                <div class="leader-bar-fill" style="width:${maxHours>0 ? (c.hours/maxHours*100).toFixed(1) : 0}%"></div>
               </div>
-            `).join("");
-          })()}
+              <span class="leader-hours">${fmtHours(c.hours)}</span>
+              <span class="leader-jobs">${c.jobs} jobs</span>
+            </div>
+          `).join("")}
+          ${unknownHours > 0 && isPartial ? `
+            <div class="leader-row" style="opacity:0.5">
+              <span class="leader-rank">?</span>
+              <span class="leader-user" style="color:var(--text-muted)">unknown users</span>
+              <div class="leader-bar-track">
+                <div class="leader-bar-fill" style="width:${maxHours>0 ? (unknownHours/maxHours*100).toFixed(1) : 0}%;background:var(--others)"></div>
+              </div>
+              <span class="leader-hours" style="color:var(--text-muted)">${fmtHours(unknownHours)}</span>
+              <span class="leader-jobs">—</span>
+            </div>
+          ` : ""}
         ` : '<div style="font-size:11px;color:var(--text-muted)">No usage data yet.</div>'}
       </div>
     `;
