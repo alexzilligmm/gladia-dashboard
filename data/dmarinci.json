@@ -1,10 +1,10 @@
 {
   "user": "dmarinci",
-  "timestamp": "2026-04-16T17:38:43Z",
+  "timestamp": "2026-04-17T07:34:15Z",
   "hostname": "login02.leonardo.local",
   "pi_of": ["IscrC_AHNetBio"],
   "jobs": [
-    {"id":"39990123","user":"dmarinci","partition":"boost_usr_prod","name":"train_phalar_bilinear","state":"RUNNING","time":"1:33:23","nodes":"1","nodelist":"lrdn0138"}
+    {"id":"39990123","user":"dmarinci","partition":"boost_usr_prod","name":"train_phalar_bilinear","state":"RUNNING","time":"15:28:56","nodes":"1","nodelist":"lrdn0138"}
   ],
   "budgets": [
     {"account":"IscrC_M4R","start":"20251103","end":"20260803","total":80000,"consumed":87333,"percent":109.2},
@@ -14,11 +14,11 @@
     {"account":"IscrC_AHNetBio","start":"20260302","end":"20261202","total":60000,"consumed":504,"percent":0.8}
   ],
   "usage": [
-    {"account":"IscrC_AHNetBio","consumed":"9:05:06","num_jobs":13},
+    {"account":"IscrC_SNav","consumed":"5832:01:56","num_jobs":374},
     {"account":"IscrC_USAE","consumed":"1504:38:37","num_jobs":352},
+    {"account":"IscrC_LENS","consumed":"35885:08:46","num_jobs":1277},
     {"account":"IscrC_M4R","consumed":"3408:23:52","num_jobs":314},
     {"account":"IscrC_SLEY","consumed":"10360:39:54","num_jobs":467},
-    {"account":"IscrC_SNav","consumed":"5832:01:56","num_jobs":374},
-    {"account":"IscrC_LENS","consumed":"35885:08:46","num_jobs":1277}
+    {"account":"IscrC_AHNetBio","consumed":"15:35:15","num_jobs":21}
   ]
 }
