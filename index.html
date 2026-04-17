@@ -260,10 +260,35 @@ html+=lbHTML("Speed Demon","lowest hours per job — the burst masters",bySpeed.
 html+=lbHTML("Hour Devourer","total core-hours consumed across all projects",byHours.map(u=>({name:u.name,val:u.hours,col:u.col})),v=>fH(v)+" h");
 html+=lbHTML("Snorlax Award","highest hours per job — masters of long naps",bySnorlax.map(u=>({name:u.name,val:u.hpj,col:u.col})),v=>v.toFixed(2)+" h/job");
 html+=lbHTML("Pyromaniac","largest single-day core-hour spike",dailyPeaks,v=>fH(v)+" h");
+html+=`<div class="lb-section"><div class="lb-title">Usage Per Day (30d)</div><div class="lb-sub">Real day-level core-hour usage from uploaded usage logs</div>
+<div class="svd-card"><canvas id="usage30-canvas" height="220"></canvas>
+<div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
 html+=`<div class="lb-section"><div class="lb-title">SVD Mentions Per Day</div><div class="lb-sub">Totally real metric tracked by our monitoring infrastructure</div>
 <div class="svd-card"><canvas id="svd-canvas" height="220"></canvas>
 <div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
 html+='</div>';return html}
+
+function usage30Series(){
+const days=30,now=new Date(),keys=[];for(let i=days-1;i>=0;i--){const d=new Date(now.getTime()-i*864e5);keys.push(`${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,"0")}${String(d.getUTCDate()).padStart(2,"0")}`)}
+return S.users.map(u=>{const m={};(u.usage_daily||[]).forEach(r=>{m[r.date]=(m[r.date]||0)+(Number(r.consumed)||0)});return{name:u.user,col:uc(u.user),vals:keys.map(k=>m[k]||0)}})
+}
+
+function drawUsage30(){
+const cv=document.getElementById("usage30-canvas");if(!cv)return;
+const dpr=window.devicePixelRatio||1;const rect=cv.getBoundingClientRect();
+cv.width=rect.width*dpr;cv.height=220*dpr;
+const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);
+const W=rect.width,H=220,pad={t:16,b:28,l:40,r:16};
+const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
+const series=usage30Series(),days=30,maxV=Math.max(1,...series.flatMap(s=>s.vals));
+ctx.strokeStyle="#c0b9a8";ctx.lineWidth=1;
+ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,H-pad.b);ctx.lineTo(W-pad.r,H-pad.b);ctx.stroke();
+ctx.fillStyle="#8a8478";ctx.font="9px 'JetBrains Mono',monospace";ctx.textAlign="right";
+for(let i=0;i<=4;i++){const y=pad.t+ph*(1-i/4);const tick=Math.round((maxV*i/4));ctx.fillText(tick,pad.l-6,y+3);if(i>0){ctx.save();ctx.strokeStyle="#ebe3ce";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.restore()}}
+ctx.textAlign="center";
+for(let d=0;d<days;d+=5){const x=pad.l+pw*(d/(days-1));ctx.fillText("d"+(d+1),x,H-pad.b+14)}
+series.forEach(s=>{ctx.strokeStyle=s.col;ctx.lineWidth=2.2;ctx.lineJoin="round";ctx.beginPath();s.vals.forEach((v,i)=>{const x=pad.l+pw*(i/(days-1)),y=pad.t+ph*(1-v/maxV);if(i===0)ctx.moveTo(x,y);else{const px=pad.l+pw*((i-1)/(days-1)),py=pad.t+ph*(1-s.vals[i-1]/maxV);const cx1=px+(x-px)*.4,cx2=x-(x-px)*.4;ctx.bezierCurveTo(cx1,py,cx2,y,x,y)}});ctx.stroke()})
+}
 
 function drawSVD(){
 const cv=document.getElementById("svd-canvas");if(!cv)return;
@@ -292,7 +317,7 @@ if(i===0)ctx.moveTo(x,y);else{const px=pad.l+pw*((i-1)/(days-1)),py=pad.t+ph*(1-
 const cx1=px+(x-px)*.4,cx2=x-(x-px)*.4;ctx.bezierCurveTo(cx1,py,cx2,y,x,y)}});
 ctx.stroke()})}
 
-new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(drawSVD)}).observe(document.getElementById("content"),{childList:true});
+new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(()=>{drawUsage30();drawSVD()})}).observe(document.getElementById("content"),{childList:true});
 fetchData();
 </script>
 </body>
