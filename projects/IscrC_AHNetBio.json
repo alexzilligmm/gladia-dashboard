@@ -1,9 +1,8 @@
 {
   "account": "IscrC_AHNetBio",
   "pi": "dmarinci",
-  "timestamp": "2026-04-16T17:39:57Z",
+  "timestamp": "2026-04-17T07:35:28Z",
   "members": [
-    {"user":"dmarinci","account":"IscrC_AHNetBio","consumed":"9:05:06","num_jobs":13},
-    {"user":"fbrigant","account":"IscrC_AHNetBio","consumed":"495:43:12","num_jobs":105}
+
   ]
 }
