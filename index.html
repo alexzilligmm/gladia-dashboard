@@ -61,7 +61,8 @@
 .lb-name{font-weight:500}.lb-val{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;color:var(--ink)}
 .lb-bar-wrap{grid-column:3/5;height:4px;background:var(--rule-soft);border-radius:2px;overflow:hidden;margin-top:4px}.lb-bar-fill{height:100%;border-radius:2px}
 .svd-card{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:22px;box-shadow:var(--shadow)}.svd-card canvas{width:100%;height:220px;display:block;margin-top:10px}
-.chart-scroll{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}.chart-scroll canvas{display:block;height:220px;min-width:100%}
+.chart-scroll{overflow-x:auto;overflow-y:hidden;padding-bottom:6px;position:relative}.chart-scroll canvas{display:block;height:220px;min-width:100%}
+.chart-yline{position:sticky;left:40px;top:16px;width:1px;height:176px;background:#b8af9d;pointer-events:none;z-index:3}
 .chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.chart-head select{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:4px 22px 4px 8px;color:var(--ink);cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238a8478'/></svg>");background-repeat:no-repeat;background-position:right 6px center}
 .svd-legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px}.svd-legend-item{display:flex;align-items:center;gap:6px}.svd-legend-dot{width:10px;height:3px;border-radius:1px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
@@ -270,7 +271,7 @@ html+=lbHTML("Hour Devourer","total core-hours consumed across all projects",byH
 html+=lbHTML("Snorlax Award","highest hours per job — masters of long naps",bySnorlax.map(u=>({name:u.name,val:u.hpj,col:u.col})),v=>v.toFixed(2)+" h/job");
 html+=lbHTML("Pyromaniac","largest single-day core-hour spike",dailyPeaks,v=>fH(v)+" h");
 html+=`<div class="lb-section"><div class="lb-title">Usage History</div><div class="lb-sub">Interactive real usage history (last 100 days or 100 weeks)</div>
-<div class="svd-card"><div class="chart-head"><span class="lb-sub" style="margin:0">window</span><select id="usage-history-mode"><option value="daily">Daily · last 100 days</option><option value="weekly">Weekly · last 100 weeks</option></select></div><div class="chart-scroll"><canvas id="usage-history-canvas" height="220"></canvas></div>
+<div class="svd-card"><div class="chart-head"><span class="lb-sub" style="margin:0">window</span><select id="usage-history-mode"><option value="daily">Daily · last 100 days</option><option value="weekly">Weekly · last 100 weeks</option></select><span class="lb-sub" style="margin:0">scale</span><select id="usage-history-scale"><option value="linear">Linear</option><option value="log2">Log2</option></select></div><div class="chart-scroll"><div class="chart-yline"></div><canvas id="usage-history-canvas" height="220"></canvas></div>
 <div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
 html+=`<div class="lb-section"><div class="lb-title">SVD Mentions Per Day</div><div class="lb-sub">Totally real metric tracked by our monitoring infrastructure</div>
 <div class="svd-card"><canvas id="svd-canvas" height="220"></canvas>
