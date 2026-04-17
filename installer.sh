@@ -113,8 +113,25 @@ _normalize_pi_projects() {
   echo "$OUT" | sed 's/^ //'
 }
 
+_extract_gist_id() {
+  local INPUT="$1"
+  # Accept full gist URL or raw gist id
+  echo "$INPUT" | sed -n 's|.*/\([a-fA-F0-9]\{20,40\}\)$|\1|p'
+}
+
 if [ -z "$TOKEN" ]; then
   read -p " GitHub token: " TOKEN
+fi
+
+# ---------- Optional pinned gist target ----------
+# You can pass GIST_LINK or GIST_ID when launching the installer.
+if [ -n "$GIST_LINK" ] && [ -z "$GIST_ID" ]; then
+  GIST_ID=$(_extract_gist_id "$GIST_LINK")
+fi
+if [ -n "$GIST_ID" ]; then
+  EXISTING_GIST_ID="$GIST_ID"
+elif [ -n "$GIST_LINK" ]; then
+  echo " ⚠ Could not parse gist id from GIST_LINK='$GIST_LINK' — falling back to auto-discovery"
 fi
 
 # ---------- PI Projects ----------
@@ -253,12 +270,15 @@ except Exception:
   print("")
   raise SystemExit(0)
 
+latest = None
 for gist in gists:
-  if gist.get("description") == desc:
-    print(gist.get("id", ""))
-    break
-else:
-  print("")
+  if gist.get("description") != desc:
+    continue
+  ts = gist.get("updated_at") or gist.get("created_at") or ""
+  if latest is None or ts > latest[0]:
+    latest = (ts, gist.get("id", ""))
+
+print(latest[1] if latest else "")
 ' "$DESCRIPTION"
 }
 
