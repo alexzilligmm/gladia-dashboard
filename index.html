@@ -62,6 +62,50 @@
 .lb-bar-wrap{grid-column:3/5;height:4px;background:var(--rule-soft);border-radius:2px;overflow:hidden;margin-top:4px}.lb-bar-fill{height:100%;border-radius:2px}
 .svd-card{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:22px;box-shadow:var(--shadow)}.svd-card canvas{width:100%;height:220px;display:block;margin-top:10px}
 .svd-legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px}.svd-legend-item{display:flex;align-items:center;gap:6px}.svd-legend-dot{width:10px;height:3px;border-radius:1px}
+/* ============  GUIDE TAB  ============ */
+.guide-section{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:22px;margin-top:20px;box-shadow:var(--shadow);animation:rise .4s ease-out backwards}
+.guide-section:nth-child(1){animation-delay:.02s}.guide-section:nth-child(2){animation-delay:.05s}.guide-section:nth-child(3){animation-delay:.08s}.guide-section:nth-child(4){animation-delay:.11s}.guide-section:nth-child(5){animation-delay:.14s}
+.guide-title{font-family:'EB Garamond',Georgia,serif;font-size:22px;font-weight:500;margin-bottom:4px;color:var(--ink)}
+.guide-sub{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:16px}
+.guide-prose{font-size:14px;color:var(--ink-soft);line-height:1.65}
+.guide-prose p+p{margin-top:8px}
+.guide-prose code,.tip-body code,.storage-table code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--card-alt);padding:1px 6px;border-radius:2px;color:var(--brand);border:1px solid var(--rule-soft)}
+.tips-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
+.tip{padding:14px 16px;background:var(--card-alt);border:1px solid var(--rule-soft);border-radius:3px;transition:border-color .15s}
+.tip:hover{border-color:var(--rule)}
+.tip-head{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--brand);font-weight:600;margin-bottom:6px}
+.tip-body{font-size:13px;color:var(--ink-soft);line-height:1.55}
+.tip-body code{font-size:11.5px;padding:1px 5px}
+.storage-table{width:100%;border-collapse:collapse;margin-top:6px}
+.storage-table th,.storage-table td{text-align:left;padding:9px 10px;border-bottom:1px dotted var(--rule-soft);font-size:13px;vertical-align:top}
+.storage-table th{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--ink-muted);font-weight:500;border-bottom:1px solid var(--rule);padding-bottom:8px}
+.storage-table td{color:var(--ink-soft)}.storage-table tr:last-child td{border-bottom:none}
+.storage-table .col-quota{font-family:'JetBrains Mono',monospace;color:var(--ink);font-variant-numeric:tabular-nums}
+.formula{background:var(--card-alt);border-left:3px solid var(--brand);padding:14px 18px;font-family:'JetBrains Mono',monospace;font-size:13px;margin:12px 0;border-radius:2px;color:var(--ink);line-height:1.8;overflow-x:auto}
+.gen-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:22px;align-items:start}
+@media(max-width:800px){.gen-grid{grid-template-columns:1fr}}
+.gen-form{display:flex;flex-direction:column;gap:14px}
+.form-row{display:flex;flex-direction:column;gap:5px}
+.form-label{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-muted);font-weight:500}
+.form-input{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--card-alt);border:1px solid var(--rule);border-radius:2px;padding:9px 11px;color:var(--ink);transition:border-color .15s;width:100%}
+.form-input:focus{outline:none;border-color:var(--brand);background:#fff}
+select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238a8478'/></svg>");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.form-help{font-size:11px;color:var(--ink-muted);font-style:italic;line-height:1.4}
+.form-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.checkbox-row{display:flex;align-items:flex-start;gap:10px;padding:11px 13px;background:var(--card-alt);border:1px solid var(--rule-soft);border-radius:2px;cursor:pointer;transition:border-color .15s}
+.checkbox-row:hover{border-color:var(--rule)}
+.checkbox-row input{accent-color:var(--brand);margin-top:3px;cursor:pointer}
+.checkbox-row-text{font-size:13px;color:var(--ink);font-weight:500}
+.checkbox-row-sub{font-size:11px;color:var(--ink-muted);margin-top:2px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em}
+.resource-summary{padding:10px 13px;background:rgba(90,127,62,.08);border:1px solid rgba(90,127,62,.25);border-radius:2px;font-size:11.5px;font-family:'JetBrains Mono',monospace;color:var(--good);line-height:1.55}
+.resource-summary.warn{background:rgba(180,118,40,.08);border-color:rgba(180,118,40,.3);color:var(--warn)}
+.tpl-preview{background:#1c1a16;color:#f6f1e6;border-radius:3px;padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.7;white-space:pre;overflow-x:auto;max-height:520px;overflow-y:auto;border:1px solid #000;margin:0 0 10px}
+.tpl-preview .tpl-dir{color:#d4a657;font-weight:600}.tpl-preview .tpl-cmt{color:#8a8478}.tpl-preview .tpl-str{color:#b8d49a}
+.tpl-actions{display:flex;gap:10px;flex-wrap:wrap}
+.tpl-btn{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:9px 16px;border-radius:2px;border:1px solid var(--rule);background:var(--card);color:var(--ink);cursor:pointer;transition:all .15s}
+.tpl-btn:hover{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tpl-btn-primary{background:var(--brand);color:var(--paper);border-color:var(--brand)}
+.tpl-btn-primary:hover{background:var(--ink);border-color:var(--ink)}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .project-card:nth-child(1),.member-card:nth-child(1){animation-delay:.02s}.project-card:nth-child(2),.member-card:nth-child(2){animation-delay:.05s}.project-card:nth-child(3),.member-card:nth-child(3){animation-delay:.08s}.project-card:nth-child(4),.member-card:nth-child(4){animation-delay:.11s}.project-card:nth-child(5),.member-card:nth-child(5){animation-delay:.14s}.project-card:nth-child(6),.member-card:nth-child(6){animation-delay:.17s}.project-card:nth-child(7),.member-card:nth-child(7){animation-delay:.20s}.project-card:nth-child(8),.member-card:nth-child(8){animation-delay:.23s}
 .page-footer{margin-top:48px;padding-top:18px;border-top:1px solid var(--rule);display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ink-muted);flex-wrap:wrap;gap:10px}.page-footer a{color:var(--brand);text-decoration:none}.page-footer a:hover{text-decoration:underline}
@@ -76,11 +120,137 @@
 <div id="banner"></div>
 <div id="doomsday-container"></div>
 <div class="stats" id="stats"></div>
-<div class="tabs-bar"><div class="tabs"><button class="tab active" data-view="projects" onclick="setView('projects')">Projects <span class="tab-count" id="ct-projects">0</span></button><button class="tab" data-view="members" onclick="setView('members')">Members <span class="tab-count" id="ct-members">0</span></button><button class="tab" data-view="fun" onclick="setView('fun')">Stats</button></div><div class="toolbar" id="toolbar"><label class="filter-toggle" id="filter-wrap"><input type="checkbox" id="filter-active" onchange="S.filterActive=this.checked;render()"> Only active</label><label>Sort</label><select id="sort-select" onchange="onSort()"></select></div></div>
+<div class="tabs-bar"><div class="tabs"><button class="tab active" data-view="projects" onclick="setView('projects')">Projects <span class="tab-count" id="ct-projects">0</span></button><button class="tab" data-view="members" onclick="setView('members')">Members <span class="tab-count" id="ct-members">0</span></button><button class="tab" data-view="fun" onclick="setView('fun')">Stats</button><button class="tab" data-view="guide" onclick="setView('guide')">Guide</button></div><div class="toolbar" id="toolbar"><label class="filter-toggle" id="filter-wrap"><input type="checkbox" id="filter-active" onchange="S.filterActive=this.checked;render()"> Only active</label><label>Sort</label><select id="sort-select" onchange="onSort()"></select></div></div>
 <div id="content"><div class="loading">Fetching the latest reports…</div></div>
 <footer class="page-footer"><span>GLADIA · Sapienza University of Rome, by Alessandro Zirilli & Davide Marincione</span><span><a href="https://gladia.di.uniroma1.it" target="_blank">gladia.di.uniroma1.it</a> · <a href="https://github.com/alexzilligmm/gladia-dashboard" target="_blank">source</a></span></footer>
 </div>
+<template id="guide-template">
+  <div style="margin-top:20px">
+    <section class="guide-section">
+      <div class="guide-title">Getting started on Leonardo</div>
+      <div class="guide-sub">SLURM · Cineca · the short version</div>
+      <div class="guide-prose">
+        <p>Leonardo uses <strong>SLURM</strong> to schedule jobs across its GPU nodes. You submit a job, as a <code>sbatch</code> script (fire &amp; forget) or an <code>salloc</code> interactive allocation, and SLURM queues it until resources are free. The conventions below are the GLADIA defaults: they won't win awards, but they keep jobs cheap and scripts reproducible.</p>
+        <p>Skip straight to the <strong>template generator</strong> below if you just need a <code>.slurm</code> file.</p>
+      </div>
+    </section>
+
+    <section class="guide-section">
+      <div class="guide-title">Best practices</div>
+      <div class="guide-sub">The stuff Davide keeps telling people in Slack</div>
+      <div class="tips-grid">
+        <div class="tip"><div class="tip-head">Python envs</div><div class="tip-body">Use <code>uv</code> for fast, reproducible venvs. Stay on CUDA ≤ 12.6 to match the node modules.</div></div>
+        <div class="tip"><div class="tip-head">Training code</div><div class="tip-body">Prefer Lightning with <code>ddp</code>, <code>bf16-mixed</code>, and <code>sync_batchnorm: true</code>. Set <code>num_nodes = ceil(#gpus / 4)</code>.</div></div>
+        <div class="tip"><div class="tip-head">Use srun</div><div class="tip-body">Always launch your program with <code>srun python main.py</code>, even inside <code>sbatch</code>, so SLURM maps one task per GPU correctly.</div></div>
+        <div class="tip"><div class="tip-head">No internet on nodes</div><div class="tip-body">Compute nodes can't reach the web. Pre-download datasets, weights, and wheels from a login node first.</div></div>
+        <div class="tip"><div class="tip-head">Don't leak salloc</div><div class="tip-body">Interactive allocations bill until you <code>exit</code>. Check <code>squeue --me</code> before closing your laptop.</div></div>
+        <div class="tip"><div class="tip-head">No brute-force sweeps</div><div class="tip-body">Avoid 0.001 resolution grid searches. Brute forcing parameters it's very expensive even only in terms of overhead. </div></div>
+      </div>
+    </section>
+
+    <section class="guide-section">
+      <div class="guide-title">Software environment</div>
+      <div class="guide-sub">Modules to load at the top of every job</div>
+      <div class="guide-prose">
+        <p>Every SLURM script should begin by loading Leonardo's module stack. Two combinations cover almost every use case, pick the one that matches the kind of code you're running.</p>
+        <p><strong>Generic CUDA stack.</strong> Plain CUDA toolkit plus the NVHPC compilers. Use this when you build your own environment from scratch (for example, a <code>uv</code> venv with your own wheels).</p>
+      </div>
+      <div class="formula">module load profile/deeplrn<br>module load cuda nvhpc</div>
+      <div class="guide-prose">
+        <p><strong>Cineca-AI stack.</strong> Cineca's curated AI image, with <code>torch</code>, <code>transformers</code>, and, critically, a pre-built <code>flash-attn</code> already in place. This saves you the painful flash-attn compile and is the fastest path to a working baseline.</p>
+      </div>
+      <div class="formula">module load profile/deeplrn<br>module load cineca-ai</div>
+    </section>
+
+    <section class="guide-section">
+      <div class="guide-title">Where to put your data</div>
+      <div class="guide-sub">Storage scopes · pick the right one</div>
+      <div class="guide-prose">
+        <p>Consider that each storage type induces <strong>different overheads on each job that interacts with it!</strong>. This really impacts wasted compute over large, with short jobs sweeps.</p>
+      </div>
+      <table class="storage-table">
+        <thead><tr><th>Path</th><th>Scope</th><th>Quota</th><th>Use for</th></tr></thead>
+        <tbody>
+          <tr><td><code>$HOME</code></td><td>Permanent · personal</td><td class="col-quota">50 GB</td><td>Configs, small code, dotfiles</td></tr>
+          <tr><td><code>$WORK</code></td><td>Permanent · per project</td><td class="col-quota">1 TB</td><td>Shared project data &amp; code</td></tr>
+          <tr><td><code>$FAST</code></td><td>Permanent · per project</td><td class="col-quota">1 TB</td><td>Hot data — fastest IO tier</td></tr>
+          <tr><td><code>$SCRATCH</code></td><td>Temporary (40 d) · personal</td><td class="col-quota">—</td><td>Checkpoints, intermediate outputs</td></tr>
+          <tr><td><code>$TMPDIR</code></td><td>Temporary · per job</td><td class="col-quota">—</td><td>Job-local scratch (wiped at end)</td></tr>
+          <tr><td><code>$PUBLIC</code></td><td>Permanent · personal · world-readable</td><td class="col-quota">50 GB</td><td>Sharing with other users</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section class="guide-section">
+      <div class="guide-title">How billing works</div>
+      <div class="guide-sub">Why the defaults are what they are</div>
+      <div class="guide-prose">
+        <p>Cineca bills the <em>most-used</em> resource on each node, proportionally to the whole node. Asking for 1 GPU without matching CPU/RAM is billed the same as claiming the whole node, so there's no reason to under-allocate.</p>
+      </div>
+      <div class="formula">R = max<sub>r</sub> ( Allocated(r) / Total(r) )&nbsp;&nbsp;→&nbsp;&nbsp;Billed hours = 32 · R · elapsed · nodes</div>
+      <div class="guide-prose">
+        <p>A Leonardo Booster node has <strong>4 GPUs · 32 CPUs · 512 GB RAM</strong>. The sweet spot per GPU is therefore <strong>8 CPUs and 128 GB RAM</strong>, that's the ratio the generator below enforces.</p>
+      </div>
+    </section>
+
+    <section class="guide-section">
+      <div class="guide-title">SLURM template generator</div>
+      <div class="guide-sub">Fill in the blanks · copy or download the script</div>
+      <div class="gen-grid">
+        <div class="gen-form">
+          <div class="form-row">
+            <label class="form-label" for="tpl-name">Job name</label>
+            <input id="tpl-name" class="form-input" type="text" value="my-job" oninput="updateTpl()">
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="tpl-account">Account · Project ID</label>
+            <input id="tpl-account" class="form-input" type="text" value="" list="tpl-projects-list" oninput="updateTpl()">
+            <datalist id="tpl-projects-list"></datalist>
+            <span class="form-help">Tab-completes from projects currently tracked on the dashboard.</span>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-row">
+              <label class="form-label" for="tpl-gpus">GPUs</label>
+              <select id="tpl-gpus" class="form-input" onchange="updateTpl()">
+                <option value="1" selected>1 GPU</option>
+                <option value="2">2 GPUs</option>
+                <option value="3">3 GPUs</option>
+                <option value="4">4 GPUs · 1 full node</option>
+                <option value="8">8 GPUs · 2 nodes</option>
+                <option value="16">16 GPUs · 4 nodes</option>
+                <option value="32">32 GPUs · 8 nodes</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="tpl-time">Wall time</label>
+              <input id="tpl-time" class="form-input" type="text" value="24:00:00" pattern="\d{1,3}:\d{2}:\d{2}" oninput="updateTpl()">
+              <span class="form-help">HH:MM:SS · up to 96 h on lprod.</span>
+            </div>
+          </div>
+          <div class="form-row">
+            <label class="form-label" for="tpl-qos">Quality of Service</label>
+            <select id="tpl-qos" class="form-input" onchange="updateTpl()">
+              <option value="normal" selected>Normal · up to 24 h</option>
+              <option value="lprod">Long (lprod) · up to 96 h</option>
+              <option value="dbg">Debug · 30 min · max 8 GPUs</option>
+            </select>
+            <span class="form-help">Normal omits the --qos line entirely.</span>
+          </div>
+          <div id="tpl-summary" class="resource-summary"></div>
+        </div>
+        <div>
+          <pre id="tpl-preview" class="tpl-preview"></pre>
+          <div class="tpl-actions">
+            <button class="tpl-btn tpl-btn-primary" onclick="downloadTpl()">↓ Download .slurm</button>
+            <button class="tpl-btn" onclick="copyTpl(this)">Copy to clipboard</button>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+</template>
 <script src="assets/doomsday-clock.js"></script>
+<script src="assets/slurm_creator.js"></script>
 <script>
 function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 const GIST_DESC_PREFIX="gladia-hpc-status-",MANUAL_GIST_SOURCES=["https://gist.github.com/Davide-F5-Marincione/b917fb214fb459ae61383c650d551c8f"],UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
@@ -183,7 +353,7 @@ function bP(users){
 function aB(){return S.projects||[]}
 function setView(v){S.view=v;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===v));updateSortOpts();render()}
 function updateSortOpts(){const sel=document.getElementById("sort-select"),tb=document.getElementById("toolbar"),fw=document.getElementById("filter-wrap"),v=S.view;
-if(v==="fun"){tb.style.display="none";return}
+if(v==="fun"||v==="guide"){tb.style.display="none";return}
 tb.style.display="flex";fw.style.display=v==="projects"?"flex":"none";
 const opts=v==="projects"?[["status","Status"],["expiry","Expiry (soonest)"],["availability","Availability (h left)"],["percent-asc","% Used ↑"],["percent-desc","% Used ↓"],["name","Name"]]:[["consumed","Consumed ↓"],["consumed-asc","Consumed ↑"],["jobs","Jobs ↓"],["name","Name"]];sel.innerHTML=opts.map(o=>`<option value="${o[0]}">${o[1]}</option>`).join("");const cur=v==="projects"?S.sort:S.msort;if(opts.some(o=>o[0]===cur))sel.value=cur;else{sel.value=opts[0][0];if(v==="projects")S.sort=opts[0][0];else S.msort=opts[0][0]}}
 function sortM(ws){switch(S.msort){case"consumed-asc":return ws.sort((a,b)=>a.tk-b.tk);case"jobs":return ws.sort((a,b)=>b.tj-a.tj);case"name":return ws.sort((a,b)=>a.u.user.localeCompare(b.u.user));default:return ws.sort((a,b)=>b.tk-a.tk)}}
@@ -208,7 +378,7 @@ const dd = typeof window.computeDoomsdayDate === "function" ? window.computeDoom
 document.getElementById("doomsday-container").innerHTML = dd ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.04);border-color:rgba(130,34,53,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:0;margin-bottom:20px;"><div><div style="color:var(--bad);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">⏳</span> Doomsday Clock</div><div style="font-size:12px;color:var(--ink-muted)">Estimated depletion of all remaining HPC allocations across the lab.</div></div><div style="text-align:right"><div style="font-family:'EB Garamond',Georgia,serif;font-size:24px;color:var(--ink);font-weight:500;line-height:1">${dd.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bad);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${Math.max(0,Math.ceil((dd.getTime()-Date.now())/864e5))} days left</div></div></div>` : '';
 document.getElementById("stats").innerHTML=`<div class="stat"><div class="stat-label">Projects</div><div class="stat-value tnum">${act}</div><div class="stat-sub">of ${all.length} · ${ov} over</div></div><div class="stat"><div class="stat-label">Members</div><div class="stat-value tnum">${S.users.length}</div><div class="stat-sub">reporting</div></div><div class="stat"><div class="stat-label">Running</div><div class="stat-value tnum" style="color:${run>0?'var(--good)':'var(--ink-muted)'}">${run}</div><div class="stat-sub">jobs on cluster</div></div><div class="stat"><div class="stat-label">Consumed</div><div class="stat-value tnum">${fH(tot)}</div><div class="stat-sub">core-hours</div></div>`;
 document.getElementById("ct-projects").textContent=all.length;document.getElementById("ct-members").textContent=S.users.length;
-document.getElementById("content").innerHTML=S.view==="projects"?rP():S.view==="members"?rM():rF()}
+document.getElementById("content").innerHTML=S.view==="projects"?rP():S.view==="members"?rM():S.view==="guide"?rG():rF()}
 
 function rP(){let bs=sortB([...aB()]);if(S.filterActive)bs=bs.filter(b=>{const k=pS(b).k;return k==="active"||k==="ending"});if(!bs.length)return'<div class="loading">No projects match.</div>';return`<div style="margin-top:20px">${bs.map(rPC).join("")}</div>`}
 
@@ -238,6 +408,29 @@ return`<article class="member-card"><div class="m-top"><div class="m-name-block"
 <div class="m-depletion"><div class="m-balance-label">Overall Depletion (30d Avg)</div><div class="m-depletion-main tnum">${depRate>0?`${fH(depRate)} h/day`:'n/a'}</div><div class="m-depletion-sub">${depDays&&depEta?`${fI(rem)} h left across active accounts · ETA ${depEta.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}`:"insufficient recent data or no active remaining quota"}</div></div>
 ${rj.length>0?`<div class="jobs-list"><div class="jobs-head"><span>ID</span><span>Name</span><span>State</span><span>Time</span><span>Nodes</span></div>${jts.map(j=>`<div class="job-row"><span style="color:var(--ink-muted)">${E(j.id)}</span><span class="job-name">${E(j.name)}</span><span class="state-pill state-${E(j.state)}"><span class="state-dot"></span>${E(j.state)}</span><span style="color:var(--ink-muted)">${E(j.time)}</span><span style="color:var(--ink-muted)">${E(j.nodes)}</span></div>`).join("")}${allj.length>3?`<button class="expand-toggle" onclick="tE('j-${E(user.user)}')">${ej?"Show top 3":`Show ${Math.min(allj.length,10)} of ${allj.length} jobs`}</button>`:""}</div>`:""}
 ${prjs.length>0?`<div style="margin-top:16px"><div class="contrib-hed" style="padding-bottom:6px;margin:0 0 8px"><span>Per-project consumption</span><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">${prjs.length}</span></div>${prjs.map(p=>{const h=pH(p.consumed);return`<div class="m-project-row"><div class="m-project-name-wrap"><span class="contrib-swatch" style="background:${col}"></span><span class="m-project-name">${E(p.account.replace(/^Iscr[CB]_/,""))}</span>${(user.pi_of||[]).includes(p.account)?'<span class="chip chip-pi">PI</span>':''}</div><span class="contrib-hours tnum">${fH(h)} h</span><span class="contrib-jobs tnum">${fI(p.num_jobs)} jobs</span><div class="m-project-bar"><div class="m-project-bar-fill" style="width:${(h/mxH)*100}%;background:${col}"></div></div></div>`}).join("")}</div>`:""}</article>`}
+
+/* ============  GUIDE TAB  ============ */
+function rG(){
+  const known=[...new Set((S.projects||[]).map(p=>p.account).concat((S.users||[]).flatMap(u=>(u.budgets||[]).map(b=>b.account))))].filter(Boolean);
+  const activeAccs=new Set((S.projects||[]).filter(p=>{try{return pS(p).k!=="expired"}catch{return true}}).map(p=>p.account));
+  known.sort((a,b)=>{
+    const aA=activeAccs.has(a),bA=activeAccs.has(b);
+    if(aA!==bA)return aA?-1:1;
+    const priA=a.startsWith("IscrC_")?0:a.startsWith("IscrB_")?1:2;
+    const priB=b.startsWith("IscrC_")?0:b.startsWith("IscrB_")?1:2;
+    if(priA!==priB)return priA-priB;
+    return a.localeCompare(b);
+  });
+  const defAcc=known[0]||"IscrC_XXXX";
+  const tpl=document.getElementById("guide-template");
+  const wrapper=document.createElement("div");
+  wrapper.appendChild(tpl.content.cloneNode(true));
+  const acct=wrapper.querySelector("#tpl-account");
+  if(acct)acct.setAttribute("value",defAcc);
+  const dl=wrapper.querySelector("#tpl-projects-list");
+  if(dl)dl.innerHTML=known.map(p=>`<option value="${E(p)}">`).join("");
+  return wrapper.innerHTML;
+}
 
 /* ============  FUN STATS TAB  ============ */
 function gatherStats(){return S.users.map(u=>{const tk=Number(u.total_consumed)||0,tj=Number(u.total_jobs)||0;return{name:u.user,hours:tk,jobs:tj,hpj:tj>0?tk/tj:Infinity,col:uc(u.user)}})}
@@ -317,7 +510,7 @@ if(i===0)ctx.moveTo(x,y);else{const px=pad.l+pw*((i-1)/(days-1)),py=pad.t+ph*(1-
 const cx1=px+(x-px)*.4,cx2=x-(x-px)*.4;ctx.bezierCurveTo(cx1,py,cx2,y,x,y)}});
 ctx.stroke()})}
 
-new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(()=>{drawUsage30();drawSVD()})}).observe(document.getElementById("content"),{childList:true});
+new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(()=>{drawUsage30();drawSVD()});if(S.view==="guide")requestAnimationFrame(updateTpl)}).observe(document.getElementById("content"),{childList:true});
 fetchData();
 </script>
 </body>
