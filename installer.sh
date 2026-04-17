@@ -235,8 +235,8 @@ _hpc_build_json() {
       printf "    {\"date\":\"%s\",\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $1, $3, $4, $5
     }')
   local USAGE_TOTALS_JSON=$(printf "%s\n" "$SALDO_R_RAW" | \
-    awk 'NF==4 && $1 !~ /^[0-9]{8}$/ && $2 != "Total" {
-      if (count++) printf ",\\n";
+    awk 'NF==4 && $1 !~ /^[0-9]{8}$/ && $2 != "Total" && $2 != "account" && $3 ~ /:/ && $4 ~ /^[0-9]+$/ {
+      if (count++) printf ",\n";
       printf "    {\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $2, $3, $4
     }')
   local USAGE_GRAND_TOTAL_JSON=$(printf "%s\n" "$SALDO_R_RAW" | \
