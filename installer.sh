@@ -29,22 +29,24 @@ echo ""
 # ---------- Read existing settings ----------
 EXISTING_TOKEN=""
 EXISTING_PI=""
+EXISTING_GIST_ID=""
 HAS_PREVIOUS=0
 
 if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
   HAS_PREVIOUS=1
   EXISTING_TOKEN=$(grep '^export HPC_GITHUB_TOKEN=' "$BASHRC" | head -1 | sed 's/^export HPC_GITHUB_TOKEN="\(.*\)"$/\1/')
   EXISTING_PI=$(grep '^export HPC_PI_PROJECTS=' "$BASHRC" | head -1 | sed 's/^export HPC_PI_PROJECTS="\(.*\)"$/\1/')
+  EXISTING_GIST_ID=$(grep '^export HPC_GIST_ID=' "$BASHRC" | head -1 | sed 's/^export HPC_GIST_ID="\(.*\)"$/\1/')
   echo " Previous install detected."
   echo ""
 fi
 
 # ---------- Project name normalizer ----------
-# Converts portal IDs (IsCd3_M4R) to saldo IDs (IscrC_M4R)
+# Converts portal IDs (IsCd3_M4R / IsBd2_M4R) to saldo IDs (IscrC_M4R / IscrB_M4R)
 _normalize_project_name() {
   local NAME="$1"
-  if [[ "$NAME" =~ ^IsC[a-zA-Z][0-9]_(.+)$ ]]; then
-    echo "IscrC_${BASH_REMATCH[1]}"
+  if [[ "$NAME" =~ ^Is([CB])[[:alnum:]][[:alnum:]]_(.+)$ ]]; then
+    echo "Iscr${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
   else
     echo "$NAME"
   fi
@@ -109,9 +111,34 @@ cat >> "$BASHRC" <<EOF
 $MARKER_BEGIN
 # GLADIA HPC Status Push v5 · Installed $(date +%F)
 export HPC_GITHUB_TOKEN="$TOKEN"
-export HPC_GITHUB_REPO="alexzilligmm/gladia-dashboard"
 export HPC_PI_PROJECTS="$PI_PROJECTS"
+export HPC_GIST_ID="$EXISTING_GIST_ID"
+export HPC_GIST_DESCRIPTION="gladia-hpc-status-${USER}"
 EOF
+
+
+# A saldo -r looks like
+## ------------------Resources used from 201401 to 202612------------------
+# date        username    account              localCluster       num.jobs
+#                                                Consumed/h
+# ------------------------------------------------------------------------
+# 20240916    dmarinci    IscrC_SNav                2:23:44              2
+# 20240917    dmarinci    IscrC_SNav              102:42:20             59
+# 20240918    dmarinci    IscrC_SNav               59:32:08             10
+# 20240919    dmarinci    IscrC_SNav              179:01:52             14
+# ...
+# 20260415    dmarinci    IscrC_AHNetBio            9:05:06             13
+# 20260416    dmarinci    IscrC_AHNetBio            6:30:09              8
+
+# ---------------------Total from 201401 to 202612------------------------
+#             username    account              localCluster       num.jobs
+#                                                Consumed/h
+
+#             dmarinci    IscrC_LENS             35885:08:46           1277
+#             ...
+#             dmarinci    IscrC_SNav              5832:01:56            374
+# -------------------------------------------------------------------------
+#                           Total                66216:07:07           2969
 
 # ---------- Part 2: Functions (quoted heredoc) ----------
 cat >> "$BASHRC" <<'HPC_PUSH_FUNCTIONS'
@@ -128,14 +155,14 @@ _hpc_build_json() {
       printf "    {\"id\":\"%s\",\"user\":\"%s\",\"partition\":\"%s\",\"name\":\"%s\",\"state\":\"%s\",\"time\":\"%s\",\"nodes\":\"%s\",\"nodelist\":\"%s\"}", $1, $2, $3, $4, $5, $6, $7, $8
     }')
   local BUDGETS_JSON=$(saldo -b -n 2>/dev/null | \
-    awk '/^Iscr/ && NF>=7 {
+    awk 'NF>=7 && $2 ~ /^[0-9]{8}$/ && $3 ~ /^[0-9]{8}$/ {
       if (count++) printf ",\n";
       printf "    {\"account\":\"%s\",\"start\":\"%s\",\"end\":\"%s\",\"total\":%d,\"consumed\":%d,\"percent\":%.1f}", $1, $2, $3, $4, $6, $7
     }')
-  local USAGE_JSON=$(saldo -r -u "$USER" -t 2>/dev/null | \
-    awk 'NF==4 && $2 ~ /^Iscr/ {
+  local USAGE_JSON=$(saldo -r -u "$USER" 2>/dev/null | \
+    awk 'NF>=5 && $1 ~ /^[0-9]{8}$/ {
       if (count++) printf ",\n";
-      printf "    {\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $2, $3, $4
+      printf "    {\"date\":\"%s\",\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $1, $3, $4, $5
     }')
   cat <<USERJSON
 {
@@ -156,26 +183,6 @@ $USAGE_JSON
 USERJSON
 }
 
-_hpc_build_project_json() {
-  local PROJECT="$1"
-  local TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  local MEMBERS_JSON=$(saldo -r -a "$PROJECT" -t 2>/dev/null | \
-    awk 'NF==4 && $2 ~ /^Iscr/ {
-      if (count++) printf ",\n";
-      printf "    {\"user\":\"%s\",\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $1, $2, $3, $4
-    }')
-  cat <<PROJJSON
-{
-  "account": "$PROJECT",
-  "pi": "$USER",
-  "timestamp": "$TIMESTAMP",
-  "members": [
-$MEMBERS_JSON
-  ]
-}
-PROJJSON
-}
-
 _hpc_validate_json() {
   if command -v python3 >/dev/null 2>&1; then
     python3 -c "import json, sys; json.load(sys.stdin)" < "$1" 2>/dev/null
@@ -184,41 +191,123 @@ _hpc_validate_json() {
   fi
 }
 
-_hpc_github_push() {
-  local FILEPATH="$1"
+_hpc_gist_find_id_by_description() {
+  local DESCRIPTION="$1"
+  curl -s \
+    -H "Authorization: token $HPC_GITHUB_TOKEN" \
+  "https://api.github.com/gists?per_page=100" | python3 -c '
+import json
+import sys
+
+desc = sys.argv[1]
+try:
+  gists = json.load(sys.stdin)
+except Exception:
+  print("")
+  raise SystemExit(0)
+
+for gist in gists:
+  if gist.get("description") == desc:
+    print(gist.get("id", ""))
+    break
+else:
+  print("")
+' "$DESCRIPTION"
+}
+
+_hpc_persist_gist_id() {
+  if grep -q '^export HPC_GIST_ID=' "$HOME/.bashrc"; then
+    sed -i "s|^export HPC_GIST_ID=\".*\"|export HPC_GIST_ID=\"$HPC_GIST_ID\"|" "$HOME/.bashrc"
+  fi
+}
+
+_hpc_gist_upsert() {
+  local FILENAME="$1"
   local LOCALFILE="$2"
-  if ! _hpc_validate_json "$LOCALFILE"; then
-    echo "[hpc-push] SKIPPED $FILEPATH: invalid JSON" >&2
+
+  if [ -z "$HPC_GITHUB_TOKEN" ]; then
+    echo "[hpc-push] SKIPPED gist upload: HPC_GITHUB_TOKEN is empty" >&2
     return 1
   fi
-  local CONTENT=$(base64 -w 0 "$LOCALFILE")
-  local SHA=$(curl -s \
-    -H "Authorization: token $HPC_GITHUB_TOKEN" \
-    "https://api.github.com/repos/$HPC_GITHUB_REPO/contents/$FILEPATH" \
-    | grep '"sha"' | head -1 | cut -d'"' -f4)
-  local BODY
-  if [ -n "$SHA" ]; then
-    BODY="{\"message\":\"${USER} $(date +%F_%T) ${FILEPATH}\",\"content\":\"${CONTENT}\",\"sha\":\"${SHA}\"}"
-  else
-    BODY="{\"message\":\"${USER} $(date +%F_%T) ${FILEPATH}\",\"content\":\"${CONTENT}\"}"
+
+  if ! command -v python3 >/dev/null 2>&1; then
+    echo "[hpc-push] SKIPPED gist upload: python3 is required" >&2
+    return 1
   fi
-  curl -s -X PUT \
-    -H "Authorization: token $HPC_GITHUB_TOKEN" \
-    "https://api.github.com/repos/$HPC_GITHUB_REPO/contents/$FILEPATH" \
-    -d "$BODY" > /dev/null
+
+  if ! _hpc_validate_json "$LOCALFILE"; then
+    echo "[hpc-push] SKIPPED $FILENAME: invalid JSON" >&2
+    return 1
+  fi
+
+  local CONTENT
+  CONTENT=$(cat "$LOCALFILE")
+  local DESC="${HPC_GIST_DESCRIPTION:-gladia-hpc-status-${USER}}"
+
+  if [ -z "$HPC_GIST_ID" ]; then
+    HPC_GIST_ID=$(_hpc_gist_find_id_by_description "$DESC")
+    if [ -n "$HPC_GIST_ID" ]; then
+      export HPC_GIST_ID
+      _hpc_persist_gist_id
+    fi
+  fi
+
+  local PAYLOAD
+  PAYLOAD=$(python3 - "$FILENAME" "$CONTENT" "$DESC" <<'PY'
+import json
+import sys
+
+filename = sys.argv[1]
+content = sys.argv[2]
+desc = sys.argv[3]
+print(json.dumps({
+    "description": desc,
+    "public": False,
+    "files": {filename: {"content": content}},
+}))
+PY
+)
+
+  if [ -z "$HPC_GIST_ID" ]; then
+    local CREATE_RESP
+    CREATE_RESP=$(curl -s -X POST \
+      -H "Authorization: token $HPC_GITHUB_TOKEN" \
+      -H "Content-Type: application/json" \
+      "https://api.github.com/gists" \
+      -d "$PAYLOAD")
+    local NEW_GIST_ID
+    NEW_GIST_ID=$(python3 -c '
+  import json
+  import sys
+
+  try:
+    data = json.load(sys.stdin)
+  except Exception:
+    print("")
+    raise SystemExit(0)
+  print(data.get("id", ""))
+  ' <<< "$CREATE_RESP")
+    if [ -n "$NEW_GIST_ID" ]; then
+      export HPC_GIST_ID="$NEW_GIST_ID"
+      _hpc_persist_gist_id
+    else
+      echo "[hpc-push] SKIPPED gist upload: gist creation failed" >&2
+      return 1
+    fi
+  else
+    curl -s -X PATCH \
+      -H "Authorization: token $HPC_GITHUB_TOKEN" \
+      -H "Content-Type: application/json" \
+      "https://api.github.com/gists/$HPC_GIST_ID" \
+      -d "$PAYLOAD" > /dev/null
+  fi
 }
 
 _hpc_push() {
   local TMPDIR="/tmp/hpc_push_$$"
   mkdir -p "$TMPDIR"
   _hpc_build_json > "$TMPDIR/user.json"
-  _hpc_github_push "data/${USER}.json" "$TMPDIR/user.json"
-  if [ -n "$HPC_PI_PROJECTS" ]; then
-    for PROJECT in $HPC_PI_PROJECTS; do
-      _hpc_build_project_json "$PROJECT" > "$TMPDIR/project.json"
-      _hpc_github_push "projects/${PROJECT}.json" "$TMPDIR/project.json"
-    done
-  fi
+  _hpc_gist_upsert "data_${USER}.json" "$TMPDIR/user.json"
   rm -rf "$TMPDIR"
 }
 
@@ -226,12 +315,13 @@ _hpc_push() {
 
 hpc-debug() {
   echo "=== PARSED budgets ==="
-  saldo -b -n 2>/dev/null | awk '/^Iscr/ && NF>=7 {printf "  %-22s total=%-7d consumed=%-7d percent=%.1f%%\n", $1, $4, $6, $7}'
+  saldo -b -n 2>/dev/null | awk 'NF>=7 && $2 ~ /^[0-9]{8}$/ && $3 ~ /^[0-9]{8}$/ {printf "  %-22s total=%-7d consumed=%-7d percent=%.1f%%\\n", $1, $4, $6, $7}'
   echo
-  echo "=== PARSED usage ==="
-  saldo -r -u "$USER" -t 2>/dev/null | awk 'NF==4 && $2 ~ /^Iscr/ {printf "  %-22s %s (%d jobs)\n", $2, $3, $4}'
+  echo "=== PARSED usage (daily) ==="
+  saldo -r -u "$USER" 2>/dev/null | awk 'NF>=5 && $1 ~ /^[0-9]{8}$/ {printf "  %s  %-22s %s (%d jobs)\\n", $1, $3, $4, $5}'
   echo
   echo "PI projects: ${HPC_PI_PROJECTS:-none}"
+  echo "Gist id: ${HPC_GIST_ID:-none}"
 }
 
 hpc-test() {
@@ -254,9 +344,9 @@ hpc-addproject() {
     return 1
   fi
   local PROJECT="$1"
-  # Normalize portal ID (IsCd3_M4R) to saldo ID (IscrC_M4R)
-  if [[ "$PROJECT" =~ ^IsC[a-zA-Z][0-9]_(.+)$ ]]; then
-    local NORMALIZED="IscrC_${BASH_REMATCH[1]}"
+  # Normalize portal ID (IsCd3_M4R / IsBd2_M4R) to saldo ID (IscrC_M4R / IscrB_M4R)
+  if [[ "$PROJECT" =~ ^Is([CB])[[:alnum:]][[:alnum:]]_(.+)$ ]]; then
+    local NORMALIZED="Iscr${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
     echo "  Normalized: $PROJECT → $NORMALIZED"
     PROJECT="$NORMALIZED"
   fi
@@ -275,7 +365,7 @@ hpc-addproject() {
   sed -i "s|^export HPC_PI_PROJECTS=\".*\"|export HPC_PI_PROJECTS=\"$HPC_PI_PROJECTS\"|" "$HOME/.bashrc"
   echo "✓ Added $PROJECT as PI project"
   echo "  Current: $HPC_PI_PROJECTS"
-  echo "  Will push project report on next login or 'hpc-push'"
+  echo "  Saved in user metadata for next 'hpc-push'"
 }
 
 hpc-rmproject() {
@@ -286,8 +376,8 @@ hpc-rmproject() {
   fi
   local PROJECT="$1"
   # Normalize portal ID so users can remove with either form
-  if [[ "$PROJECT" =~ ^IsC[a-zA-Z][0-9]_(.+)$ ]]; then
-    PROJECT="IscrC_${BASH_REMATCH[1]}"
+  if [[ "$PROJECT" =~ ^Is([CB])[[:alnum:]][[:alnum:]]_(.+)$ ]]; then
+    PROJECT="Iscr${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
   fi
   export HPC_PI_PROJECTS=$(echo "$HPC_PI_PROJECTS" | sed "s|$PROJECT||g" | tr -s ' ' | sed 's/^ //;s/ $//')
   sed -i "s|^export HPC_PI_PROJECTS=\".*\"|export HPC_PI_PROJECTS=\"$HPC_PI_PROJECTS\"|" "$HOME/.bashrc"
@@ -330,7 +420,7 @@ echo " Kicking off initial push in background..."
 ( _hpc_push ) </dev/null >"$HOME/.hpc-push.log" 2>&1 &
 disown $! 2>/dev/null
 echo " ✓ Push started — will complete in ~1-2 min"
-echo "   (check ~/.hpc-push.log if data doesn't appear on GitHub)"
+echo "   (check ~/.hpc-push.log if data doesn't appear on Gist)"
 echo ""
 echo " ┌─────────────────────────────────────────────────────┐"
 echo " │  Remember: this is not a wall of shame 😄           │"
@@ -351,7 +441,12 @@ echo " └───────────────────────�
 echo ""
 echo " PI projects: ${HPC_PI_PROJECTS:-none}"
 echo " Auto-push: runs on every login (non-blocking)"
+echo " Gist id: ${HPC_GIST_ID:-pending creation on first push}"
 echo ""
 echo " Check in ~1 min:"
-echo "   https://github.com/alexzilligmm/gladia-dashboard/tree/main/data"
+if [ -n "$HPC_GIST_ID" ]; then
+  echo "   https://gist.github.com/${HPC_GIST_ID}"
+else
+  echo "   https://gist.github.com"
+fi
 

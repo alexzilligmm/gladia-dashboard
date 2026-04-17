@@ -142,10 +142,10 @@ function cDD() {
   // FIX: Convert 't' back to milliseconds before creating the final Date
   return new Date(n + Math.round(t * 864e5));
 }
-const R="alexzilligmm/gladia-dashboard",UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
+const GIST_DESC_PREFIX="gladia-hpc-status-",UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
 let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",filterActive:false,expanded:{}};
-function pH(s){if(!s)return 0;const p=String(s).split(":");return parseInt(p[0]||0)+parseInt(p[1]||0)/60+parseInt(p[2]||0)/3600}
+function pH(s){if(s===null||s===undefined||s==="")return 0;if(typeof s==="number")return s;const p=String(s).split(":");return parseFloat(p[0]||0)+parseFloat(p[1]||0)/60+parseFloat(p[2]||0)/3600}
 function fH(h){if(h>=1e5)return(h/1e3).toFixed(0)+"k";if(h>=1e3)return(h/1e3).toFixed(1)+"k";return Math.round(h).toLocaleString()}
 function fI(n){return Number(n).toLocaleString()}
 function tA(ts){const d=Date.now()-new Date(ts).getTime(),m=Math.floor(d/6e4);if(m<1)return"just now";if(m<60)return m+"m ago";const h=Math.floor(m/60);return h<24?h+"h ago":Math.floor(h/24)+"d ago"}
@@ -157,15 +157,49 @@ function pC(p){return p>=100?"var(--bad)":p>=90?"var(--warn)":"var(--ink)"}
 
 async function fetchData(){
 document.getElementById("content").innerHTML='<div class="loading">Fetching the latest reports…</div>';document.getElementById("banner").innerHTML="";
-let u=[],p=[];try{const dl=await fetch(`https://api.github.com/repos/${R}/contents/data`);if(dl.ok){const f=(await dl.json()).filter(f=>f.name.endsWith(".json"));u=await Promise.all(f.map(f=>fetch(f.download_url).then(r=>r.json())))}
-const pl=await fetch(`https://api.github.com/repos/${R}/contents/projects`);if(pl.ok){const f=(await pl.json()).filter(f=>f.name.endsWith(".json"));p=await Promise.all(f.map(f=>fetch(f.download_url).then(r=>r.json())))}
-if(!u.length)document.getElementById("banner").innerHTML='<div class="banner">No data yet — waiting for members to log into Leonardo.</div>';
+let u=[];try{u=await fG();
+if(!u.length)document.getElementById("banner").innerHTML='<div class="banner">No public Gist reports found yet — waiting for members to log into Leonardo and upload.</div>';
 }catch(e){document.getElementById("banner").innerHTML=`<div class="banner">Could not reach the archive: ${E(e.message)}</div>`}
-S.users=u;S.projects=p;const now=new Date();
+S.users=u;S.projects=bP(u);const now=new Date();
 document.getElementById("date-line").textContent=now.toLocaleDateString("en-GB",{weekday:"short",day:"2-digit",month:"short"}).toUpperCase();
 document.getElementById("last-refresh").textContent=`Refreshed ${now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`;updateSortOpts();render()}
 
-function aB(){const m={};S.users.forEach(u=>u.budgets?.forEach(b=>{m[b.account]=b}));return Object.values(m)}
+function pTS(ts){const v=Date.parse(ts||"");return Number.isFinite(v)?v:0}
+function nU(u){const m={};(u.usage||[]).forEach(x=>{if(!x?.account)return;const y=m[x.account]||(m[x.account]={account:x.account,consumed:0,num_jobs:0});y.consumed+=pH(x.consumed);y.num_jobs+=(Number(x.num_jobs)||0)});u.usage=(Object.values(m).map(x=>({account:x.account,consumed:x.consumed,num_jobs:x.num_jobs})));return u}
+
+async function fG(){
+  const gists=[];
+  for(let page=1;page<=3;page++){
+    const gl=await fetch(`https://api.github.com/gists/public?per_page=100&page=${page}`);
+    if(!gl.ok)throw new Error(`GitHub API ${gl.status}`);
+    const chunk=await gl.json();
+    gists.push(...chunk);
+    if(chunk.length<100)break;
+  }
+  const cand=gists.filter(g=>String(g.description||"").startsWith(GIST_DESC_PREFIX));
+  const loaded=await Promise.all(cand.map(async g=>{
+    const jf=Object.values(g.files||{}).find(f=>f?.filename?.endsWith(".json")&&f?.raw_url);
+    if(!jf)return null;
+    try{
+      const data=await fetch(jf.raw_url).then(r=>r.json());
+      if(!data||!data.user)return null;
+      data.__updated_at=g.updated_at||g.created_at||data.timestamp;
+      return nU(data);
+    }catch{return null}
+  }));
+  const byUser={};
+  loaded.filter(Boolean).forEach(u=>{const k=u.user,ts=pTS(u.__updated_at||u.timestamp);if(!byUser[k]||ts>pTS(byUser[k].__updated_at||byUser[k].timestamp))byUser[k]=u});
+  return Object.values(byUser);
+}
+
+function bP(users){
+  const pm={},pi={};
+  users.forEach(u=>{const ts=pTS(u.__updated_at||u.timestamp);(u.budgets||[]).forEach(b=>{if(!b?.account)return;const cur=pm[b.account];if(!cur||ts>cur.__ts){pm[b.account]={...b,percent:Number.isFinite(Number(b.percent))?Number(b.percent):((Number(b.total)||0)>0?((Number(b.consumed)||0)/(Number(b.total)||1))*100:0),__ts:ts}}});(u.pi_of||[]).forEach(acc=>{if(!pi[acc]||ts>pi[acc].ts)pi[acc]={user:u.user,ts}})});
+  Object.values(pm).forEach(p=>{const mm={};users.forEach(u=>{const x=(u.usage||[]).find(z=>z.account===p.account);if(!x)return;mm[u.user]={user:u.user,account:p.account,consumed:x.consumed,num_jobs:x.num_jobs||0}});p.members=Object.values(mm);p.pi=pi[p.account]?.user||null});
+  return Object.values(pm).map(({__ts,...rest})=>rest);
+}
+
+function aB(){return S.projects||[]}
 function setView(v){S.view=v;document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.view===v));updateSortOpts();render()}
 function updateSortOpts(){const sel=document.getElementById("sort-select"),tb=document.getElementById("toolbar"),fw=document.getElementById("filter-wrap"),v=S.view;
 if(v==="fun"){tb.style.display="none";return}
@@ -201,7 +235,7 @@ function rPC(b){const{cs,pi,partial}=gC(b.account);cs.sort((a,c)=>c.hours-a.hour
 let run=0;const segs=cs.filter(c=>c.hours>.1).map(c=>{const w=Math.min((c.hours/b.total)*100,100-run);run+=w;return{...c,wp:w}});
 const ks=cs.reduce((s,c)=>s+c.hours,0),uh=Math.max(0,b.consumed-ks),uw=Math.min((uh/b.total)*100,Math.max(0,100-run)),oq=tp>100?Math.min(tp-100,20):0;
 const exp=S.expanded[`p-${b.account}`],show=exp?cs:cs.slice(0,5);
-return`<article class="project-card"><div class="p-header"><div class="p-title"><span class="p-name">${E(b.account.replace("IscrC_",""))}</span><span class="p-fullname">${E(b.account)}</span></div><span class="p-percent tnum" style="color:${pC(tp)}">${tp.toFixed(1)}<span style="font-size:18px">%</span></span></div>
+return`<article class="project-card"><div class="p-header"><div class="p-title"><span class="p-name">${E(b.account.replace(/^Iscr[CB]_/,""))}</span><span class="p-fullname">${E(b.account)}</span></div><span class="p-percent tnum" style="color:${pC(tp)}">${tp.toFixed(1)}<span style="font-size:18px">%</span></span></div>
 <div class="p-meta">${pi?`<span class="p-meta-item"><span class="p-meta-label">PI</span><span class="p-meta-value">${E(pi)}</span></span>`:""}<span class="p-meta-item"><span class="p-meta-label">Period</span><span class="p-meta-value">${fM(b.start)} → ${fM(b.end)}</span></span><span class="p-meta-item"><span class="chip ${st.c}">${st.l}</span></span><span class="p-meta-item" style="margin-left:auto"><span class="p-meta-label">Remaining</span><span class="p-meta-value">${fI(rem)} h</span></span><span class="p-meta-item"><span class="p-meta-label">Quota</span><span class="p-meta-value">${fI(b.total)} h</span></span></div>
 <div class="seg-bar">${segs.map(s=>`<div class="seg" style="width:${s.wp}%;background:${uc(s.user)}" title="${E(s.user)}: ${fH(s.hours)} h"></div>`).join("")}${uw>0?`<div class="seg" style="width:${uw}%;background:var(--rule);opacity:.5" title="Unreported: ${fH(uh)} h"></div>`:""}${oq>0?`<div class="seg seg-over" style="width:${oq}%"></div>`:""}</div>
 <div class="bar-footer"><span>${fI(b.consumed)} / ${fI(b.total)} h</span><span>${rem>0?fI(rem)+" h remaining":Math.abs(b.total-b.consumed).toLocaleString()+" h over"}</span></div>
@@ -217,7 +251,7 @@ const ej=S.expanded[`j-${user.user}`],allj=(user.jobs||[]),jts=ej?allj.slice(0,1
 return`<article class="member-card"><div class="m-top"><div class="m-name-block"><div class="m-avatar" style="color:${col}">${E(user.user.slice(0,1).toUpperCase())}</div><div><div class="m-name">${E(user.user)} ${isPi?'<span class="chip chip-pi" style="vertical-align:middle;margin-left:6px">PI</span>':''}</div><div class="m-meta">${E(user.hostname||"")} · ${tA(user.timestamp)}</div></div></div>${rj.length>0?`<span class="m-running"><span class="m-running-dot"></span>${rj.length} running</span>`:""}</div>
 <div class="m-balance ${isPi?'':'non-pi'}"><div><div class="m-balance-label">Consumed</div><div class="m-balance-value tnum">${fH(taken)}</div><div class="m-balance-sub">core-hours · ${fI(totalJobs)} jobs</div></div>${isPi?`<div><div class="m-balance-label">Gathered</div><div class="m-balance-value tnum" style="color:var(--good)">${fH(gathered)}</div><div class="m-balance-sub">${user.pi_of.length} project${user.pi_of.length>1?'s':''}</div></div><div><div class="m-balance-label">Net</div><div class="m-balance-value tnum" style="color:${net>=0?'var(--good)':'var(--bad)'}">${net>=0?'+':''}${fH(Math.abs(net))}</div><div class="m-balance-sub">gathered − used</div></div>`:`<div><div class="m-balance-label">Projects</div><div class="m-balance-value tnum">${prjs.length}</div><div class="m-balance-sub">contributing to</div></div>`}</div>
 ${rj.length>0?`<div class="jobs-list"><div class="jobs-head"><span>ID</span><span>Name</span><span>State</span><span>Time</span><span>Nodes</span></div>${jts.map(j=>`<div class="job-row"><span style="color:var(--ink-muted)">${E(j.id)}</span><span class="job-name">${E(j.name)}</span><span class="state-pill state-${E(j.state)}"><span class="state-dot"></span>${E(j.state)}</span><span style="color:var(--ink-muted)">${E(j.time)}</span><span style="color:var(--ink-muted)">${E(j.nodes)}</span></div>`).join("")}${allj.length>3?`<button class="expand-toggle" onclick="tE('j-${E(user.user)}')">${ej?"Show top 3":`Show ${Math.min(allj.length,10)} of ${allj.length} jobs`}</button>`:""}</div>`:""}
-${prjs.length>0?`<div style="margin-top:16px"><div class="contrib-hed" style="padding-bottom:6px;margin:0 0 8px"><span>Per-project consumption</span><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">${prjs.length}</span></div>${prjs.map(p=>{const h=pH(p.consumed);return`<div class="m-project-row"><div class="m-project-name-wrap"><span class="contrib-swatch" style="background:${col}"></span><span class="m-project-name">${E(p.account.replace("IscrC_",""))}</span>${(user.pi_of||[]).includes(p.account)?'<span class="chip chip-pi">PI</span>':''}</div><span class="contrib-hours tnum">${fH(h)} h</span><span class="contrib-jobs tnum">${fI(p.num_jobs)} jobs</span><div class="m-project-bar"><div class="m-project-bar-fill" style="width:${(h/mxH)*100}%;background:${col}"></div></div></div>`}).join("")}</div>`:""}</article>`}
+${prjs.length>0?`<div style="margin-top:16px"><div class="contrib-hed" style="padding-bottom:6px;margin:0 0 8px"><span>Per-project consumption</span><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">${prjs.length}</span></div>${prjs.map(p=>{const h=pH(p.consumed);return`<div class="m-project-row"><div class="m-project-name-wrap"><span class="contrib-swatch" style="background:${col}"></span><span class="m-project-name">${E(p.account.replace(/^Iscr[CB]_/,""))}</span>${(user.pi_of||[]).includes(p.account)?'<span class="chip chip-pi">PI</span>':''}</div><span class="contrib-hours tnum">${fH(h)} h</span><span class="contrib-jobs tnum">${fI(p.num_jobs)} jobs</span><div class="m-project-bar"><div class="m-project-bar-fill" style="width:${(h/mxH)*100}%;background:${col}"></div></div></div>`}).join("")}</div>`:""}</article>`}
 
 /* ============  FUN STATS TAB  ============ */
 function gatherStats(){return S.users.map(u=>{const tk=(u.usage||[]).reduce((s,x)=>s+pH(x.consumed),0),tj=(u.usage||[]).reduce((s,x)=>s+(x.num_jobs||0),0);return{name:u.user,hours:tk,jobs:tj,hpj:tj>0?tk/tj:Infinity,col:uc(u.user)}})}
