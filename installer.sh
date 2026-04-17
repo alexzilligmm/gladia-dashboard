@@ -9,6 +9,53 @@ BASHRC="$HOME/.bashrc"
 MARKER_BEGIN="# >>> GLADIA HPC STATUS PUSH BEGIN >>>"
 MARKER_END="# <<< GLADIA HPC STATUS PUSH END <<<"
 
+MODE="${1:-install}"
+
+if [[ "$MODE" == "--uninstall" || "$MODE" == "uninstall" ]]; then
+  echo ""
+  echo " GLADIA HPC Status Push — Uninstall"
+  echo " Target: $BASHRC"
+  echo ""
+
+  if [ ! -f "$BASHRC" ]; then
+    echo " Nothing to do: $BASHRC does not exist."
+    exit 0
+  fi
+
+  cp "$BASHRC" "$BASHRC.bak.$(date +%s)"
+  echo " ✓ Backed up $BASHRC"
+
+  if grep -q "$MARKER_BEGIN" "$BASHRC"; then
+    sed -i "/$MARKER_BEGIN/,/$MARKER_END/d" "$BASHRC"
+    echo " ✓ Removed GLADIA install block"
+  else
+    echo " Nothing to remove: install block not found"
+  fi
+
+  echo ""
+  echo " Sourcing bashrc..."
+  set +e
+  source "$BASHRC"
+  SRC_RC=$?
+  set -e
+  if [ $SRC_RC -ne 0 ]; then
+    echo " ⚠ .bashrc returned non-zero ($SRC_RC) — continuing anyway"
+  fi
+
+  echo ""
+  echo " ✓ Uninstall complete"
+  echo ""
+  echo " Optional cleanup in current shell:"
+  echo "   unset HPC_GITHUB_TOKEN HPC_PI_PROJECTS HPC_GIST_ID HPC_GIST_DESCRIPTION"
+  echo "   unset -f hpc-push hpc-test hpc-debug hpc-addproject hpc-rmproject"
+  exit 0
+fi
+
+if [[ "$MODE" != "install" ]]; then
+  echo "Usage: $0 [--uninstall]"
+  exit 1
+fi
+
 cat <<'LOGO'
 
           ██████╗ ██╗      █████╗ ██████╗ ██╗ █████╗
