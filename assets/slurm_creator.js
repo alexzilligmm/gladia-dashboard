@@ -19,7 +19,7 @@ function buildTpl(){
   const memPerNodeGB=128*gpusPerNode;
   const totalCpus=nodes*gpusPerNode*cpusPerTask;
   const qosName={lprod:"boost_qos_lprod",dbg:"boost_qos_dbg",bprod:"boost_qos_bprod"}[qos];
-  const qosLabel={normal:"normal QOS · up to 24 h",lprod:"QOS lprod · up to 96 h",dbg:"DEBUG · 30 min max",bprod:"BIG · at least 260 GPUs"}[qos];
+  const qosLabel={normal:"normal QOS · up to 24 h",lprod:"QOS lprod · up to 96 h",dbg:"DEBUG · 30 min max",bprod:"BIG · at least 65 nodes"}[qos];
   const lines=[
     "#!/bin/bash","",
     `#SBATCH --job-name "${name}"`,
