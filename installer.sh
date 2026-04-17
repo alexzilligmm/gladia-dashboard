@@ -511,9 +511,6 @@ echo " Auto-push: runs on every login (non-blocking)"
 echo " Gist id: ${HPC_GIST_ID:-pending creation on first push}"
 echo ""
 echo " Check in ~1 min:"
-if [ -n "$HPC_GIST_ID" ]; then
-  echo "   https://gist.github.com/${HPC_GIST_ID}"
-else
-  echo "   https://gist.github.com"
+echo "   https://alexzilligmm.github.io/gladia-dashboard"
 fi
 
