@@ -8,6 +8,7 @@ set -e
 BASHRC="$HOME/.bashrc"
 MARKER_BEGIN="# >>> GLADIA HPC STATUS PUSH BEGIN >>>"
 MARKER_END="# <<< GLADIA HPC STATUS PUSH END <<<"
+DEFAULT_GIST_ID="b917fb214fb459ae61383c650d551c8f"
 
 MODE="${1:-install}"
 
@@ -76,14 +77,17 @@ echo ""
 # ---------- Read existing settings ----------
 EXISTING_TOKEN=""
 EXISTING_PI=""
-EXISTING_GIST_ID=""
+EXISTING_GIST_ID="$DEFAULT_GIST_ID"
 HAS_PREVIOUS=0
 
 if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
   HAS_PREVIOUS=1
   EXISTING_TOKEN=$(grep '^export HPC_GITHUB_TOKEN=' "$BASHRC" | head -1 | sed 's/^export HPC_GITHUB_TOKEN="\(.*\)"$/\1/')
   EXISTING_PI=$(grep '^export HPC_PI_PROJECTS=' "$BASHRC" | head -1 | sed 's/^export HPC_PI_PROJECTS="\(.*\)"$/\1/')
-  EXISTING_GIST_ID=$(grep '^export HPC_GIST_ID=' "$BASHRC" | head -1 | sed 's/^export HPC_GIST_ID="\(.*\)"$/\1/')
+  FOUND_GIST_ID=$(grep '^export HPC_GIST_ID=' "$BASHRC" | head -1 | sed 's/^export HPC_GIST_ID="\(.*\)"$/\1/')
+  if [ -n "$FOUND_GIST_ID" ]; then
+    EXISTING_GIST_ID="$FOUND_GIST_ID"
+  fi
   echo " Previous install detected."
   echo ""
 fi
@@ -380,7 +384,7 @@ _hpc_push() {
 
 # ---- User-facing commands ----
 
-hpc-debug() {
+hpc_debug() {
   echo "=== PARSED budgets ==="
   saldo -b -n 2>/dev/null | awk 'NF>=7 && $2 ~ /^[0-9]{8}$/ && $3 ~ /^[0-9]{8}$/ {printf "  %-22s total=%-7d consumed=%-7d percent=%.1f%%\\n", $1, $4, $6, $7}'
   echo
@@ -391,7 +395,7 @@ hpc-debug() {
   echo "Gist id: ${HPC_GIST_ID:-none}"
 }
 
-hpc-test() {
+hpc_test() {
   local OUT=$(_hpc_build_json)
   echo "$OUT"
   echo "---"
@@ -404,7 +408,7 @@ hpc-test() {
   fi
 }
 
-hpc-addproject() {
+hpc_addproject() {
   if [ -z "$1" ]; then
     echo "Usage: hpc-addproject IscrC_myproject"
     echo "Current PI projects: ${HPC_PI_PROJECTS:-none}"
@@ -435,7 +439,7 @@ hpc-addproject() {
   echo "  Saved in user metadata for next 'hpc-push'"
 }
 
-hpc-rmproject() {
+hpc_rmproject() {
   if [ -z "$1" ]; then
     echo "Usage: hpc-rmproject IscrC_myproject"
     echo "Current PI projects: ${HPC_PI_PROJECTS:-none}"
@@ -452,11 +456,18 @@ hpc-rmproject() {
   echo "  Current: ${HPC_PI_PROJECTS:-none}"
 }
 
-hpc-push() {
+hpc_push() {
   ( _hpc_push ) </dev/null >/dev/null 2>&1 &
   disown $! 2>/dev/null
   echo "Pushing in background (~1-2 min)..."
 }
+
+# Expose hyphenated commands as aliases for convenience.
+alias hpc-push='hpc_push'
+alias hpc-test='hpc_test'
+alias hpc-debug='hpc_debug'
+alias hpc-addproject='hpc_addproject'
+alias hpc-rmproject='hpc_rmproject'
 
 # Auto-push on every interactive shell startup (non-blocking, survives shell exit)
 if [[ $- == *i* ]]; then
@@ -512,5 +523,4 @@ echo " Gist id: ${HPC_GIST_ID:-pending creation on first push}"
 echo ""
 echo " Check in ~1 min:"
 echo "   https://alexzilligmm.github.io/gladia-dashboard"
-fi
 
