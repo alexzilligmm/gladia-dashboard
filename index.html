@@ -88,7 +88,7 @@
 function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 const GIST_DESC_PREFIX="gladia-hpc-status-",MANUAL_GIST_SOURCES=["https://gist.github.com/Davide-F5-Marincione/b917fb214fb459ae61383c650d551c8f"],UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 // Browser-edit toggle for alert QA: set to true to force the red-alert banner.
-const TEST_FORCE_RED_ALERT=true;
+const TEST_FORCE_RED_ALERT=false;
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
 let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",filterActive:false,expanded:{}};
 function pH(s){if(s===null||s===undefined||s==="")return 0;if(typeof s==="number")return s;const p=String(s).split(":");return parseFloat(p[0]||0)+parseFloat(p[1]||0)/60+parseFloat(p[2]||0)/3600}
