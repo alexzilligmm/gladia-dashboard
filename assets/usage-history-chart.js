@@ -17,11 +17,11 @@
   }
 
   function labelDay(ymd) {
-    return `${ymd.slice(4, 6)}/${ymd.slice(6, 8)}/${ymd.slice(2, 4)}`;
+    return `${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`;
   }
 
   function labelWeek(ymd) {
-    return `W ${ymd.slice(4, 6)}/${ymd.slice(6, 8)}/${ymd.slice(2, 4)}`;
+    return `W ${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`;
   }
 
   function linearSnapMax(v) {
