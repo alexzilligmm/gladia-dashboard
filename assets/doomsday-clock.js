@@ -109,5 +109,69 @@
     return new Date(nowMs + Math.round(t * 86400000));
   }
 
+  function hasIscraCBudget(projects, nowMs) {
+    return projects.some((p) => {
+      if (!/^Iscra?C_/i.test(String(p.account || ""))) return false;
+      const status = getStatus(p, nowMs);
+      return status === "active" || status === "ending";
+    });
+  }
+
+  function nextIscraCCallDate(now) {
+    // Calls are on the 15th monthly, except Aug/Dec which shift to the next month.
+    for (let offset = 0; offset < 36; offset++) {
+      const y = now.getUTCFullYear();
+      const m = now.getUTCMonth() + offset;
+      const year = y + Math.floor(m / 12);
+      const month = ((m % 12) + 12) % 12;
+
+      if (month === 7 || month === 11) continue; // Aug, Dec skipped
+
+      const candidate = new Date(Date.UTC(year, month, 15, 0, 0, 0, 0));
+      if (candidate.getTime() > now.getTime()) return candidate;
+    }
+    return null;
+  }
+
+  function computeDoomsdayAlertInfo(projects, users) {
+    const now = new Date();
+    const nowMs = now.getTime();
+    const doomsdayDate = computeDoomsdayDate(projects, users);
+
+    if (!hasIscraCBudget(projects, nowMs)) {
+      return {
+        doomsdayDate,
+        iscraNextCallDate: null,
+        iscraAcceptanceDate: null,
+        iscraSafetyDate: null,
+        redAlert: false,
+      };
+    }
+
+    const callDate = nextIscraCCallDate(now);
+    if (!callDate) {
+      return {
+        doomsdayDate,
+        iscraNextCallDate: null,
+        iscraAcceptanceDate: null,
+        iscraSafetyDate: null,
+        redAlert: false,
+      };
+    }
+
+    const acceptanceDate = new Date(callDate.getTime() + 45 * 86400000);
+    const safetyDate = new Date(acceptanceDate.getTime() + 30 * 86400000);
+    const redAlert = !!(doomsdayDate && doomsdayDate.getTime() < safetyDate.getTime());
+
+    return {
+      doomsdayDate,
+      iscraNextCallDate: callDate,
+      iscraAcceptanceDate: acceptanceDate,
+      iscraSafetyDate: safetyDate,
+      redAlert,
+    };
+  }
+
   window.computeDoomsdayDate = computeDoomsdayDate;
+  window.computeDoomsdayAlertInfo = computeDoomsdayAlertInfo;
 })();
