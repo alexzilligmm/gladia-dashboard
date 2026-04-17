@@ -79,69 +79,9 @@
 <div id="content"><div class="loading">Fetching the latest reports…</div></div>
 <footer class="page-footer"><span>GLADIA · Sapienza University of Rome, by Alessandro Zirilli & Davide Marincione</span><span><a href="https://gladia.di.uniroma1.it" target="_blank">gladia.di.uniroma1.it</a> · <a href="https://github.com/alexzilligmm/gladia-dashboard" target="_blank">source</a></span></footer>
 </div>
+<script src="assets/doomsday-clock.js"></script>
 <script>
 function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
-// Calculates the global Doomsday date by finding the Total Remaining / Total Lab Depletion Rate
-function cDD() {
-  const n = Date.now();
-  let active =[];
-  aB().forEach(b => {
-    const s = pS(b);
-    if (s.k === "active" || s.k === "ending") {
-      const days_elapsed = Math.max(1, (n - pD(b.start).getTime()) / 864e5);
-      const v = b.consumed / days_elapsed; // rate: core-hrs/day
-      const r = Math.max(0, b.total - b.consumed); // remaining quota
-      const e = (pD(b.end).getTime() - n) / 864e5; // days until hard expiration
-      if (v > 0 && r > 0 && e > 0) active.push({ r, v, e });
-    }
-  });
-  if (!active.length) return null;
-
-  let t = 0;
-  while (active.length > 0) {
-    let dt = Infinity;
-    let min_i = -1;
-    let spilled_v = 0;
-    
-    for (let i = 0; i < active.length; i++) {
-      let curr = active[i];
-      // FIX: Clamp negatives to 0 to safely handle floating-point inaccuracies
-      const ttd = Math.max(0, Math.min(curr.r / curr.v, curr.e - t));
-      
-      // FIX: Removed "ttd > 0" to allow processing of simultaneous depletions
-      if (ttd < dt) {
-        dt = ttd;
-        min_i = i;
-        spilled_v = curr.v;
-      }
-    }
-    
-    // FIX: Only break on Infinity. Allow dt === 0 to pass through
-    if (dt === Infinity) break;
-    
-    t += dt;
-    active.splice(min_i, 1);
-    
-    // FIX: Guard against operating on an empty array when the last budget dies
-    if (active.length > 0) {
-      let max_i = -1;
-      let curr_max_r = -Infinity; // Safer than -1
-      
-      for (let i = 0; i < active.length; i++) {
-        let curr = active[i];
-        curr.r = curr.r - curr.v * dt;
-        if (curr_max_r < curr.r) {
-          curr_max_r = curr.r;
-          max_i = i;
-        }
-      }
-      active[max_i].v += spilled_v;
-    }
-  }
-  
-  // FIX: Convert 't' back to milliseconds before creating the final Date
-  return new Date(n + Math.round(t * 864e5));
-}
 const GIST_DESC_PREFIX="gladia-hpc-status-",MANUAL_GIST_SOURCES=["https://gist.github.com/Davide-F5-Marincione/b917fb214fb459ae61383c650d551c8f"],UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
 let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",filterActive:false,expanded:{}};
@@ -263,7 +203,7 @@ default:return bs.sort((a,b)=>{const sa=pS(a),sb=pS(b);return so[sa.k]!==so[sb.k
 
 function render(){const all=aB(),act=all.filter(b=>pS(b).k!=="expired").length,ov=all.filter(b=>b.percent>=100&&dB(pD(b.end))>=0).length,run=S.users.reduce((s,u)=>s+(u.jobs?.filter(j=>j.state==="RUNNING").length||0),0),tot=all.reduce((s,b)=>s+b.consumed,0);
 // Render Doomsday Clock if applicable
-const dd = cDD();
+const dd = typeof window.computeDoomsdayDate === "function" ? window.computeDoomsdayDate(all,S.users) : null;
 document.getElementById("doomsday-container").innerHTML = dd ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.04);border-color:rgba(130,34,53,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:0;margin-bottom:20px;"><div><div style="color:var(--bad);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">⏳</span> Doomsday Clock</div><div style="font-size:12px;color:var(--ink-muted)">Estimated depletion of all remaining HPC allocations across the lab.</div></div><div style="text-align:right"><div style="font-family:'EB Garamond',Georgia,serif;font-size:24px;color:var(--ink);font-weight:500;line-height:1">${dd.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bad);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${Math.max(0,Math.ceil((dd.getTime()-Date.now())/864e5))} days left</div></div></div>` : '';
 document.getElementById("stats").innerHTML=`<div class="stat"><div class="stat-label">Projects</div><div class="stat-value tnum">${act}</div><div class="stat-sub">of ${all.length} · ${ov} over</div></div><div class="stat"><div class="stat-label">Members</div><div class="stat-value tnum">${S.users.length}</div><div class="stat-sub">reporting</div></div><div class="stat"><div class="stat-label">Running</div><div class="stat-value tnum" style="color:${run>0?'var(--good)':'var(--ink-muted)'}">${run}</div><div class="stat-sub">jobs on cluster</div></div><div class="stat"><div class="stat-label">Consumed</div><div class="stat-value tnum">${fH(tot)}</div><div class="stat-sub">core-hours</div></div>`;
 document.getElementById("ct-projects").textContent=all.length;document.getElementById("ct-members").textContent=S.users.length;
