@@ -210,16 +210,20 @@ async function fG(){
     }catch{}
   }));
   const cand=Object.values(byId).filter(g=>manualIds.includes(g.id)||String(g.description||"").startsWith(GIST_DESC_PREFIX));
-  const loaded=await Promise.all(cand.map(async g=>{
-    const jf=Object.values(g.files||{}).find(f=>f?.filename?.endsWith(".json")&&f?.raw_url);
-    if(!jf)return null;
-    try{
-      const data=await fetch(jf.raw_url).then(r=>r.json());
-      if(!data||!data.user)return null;
-      data.__updated_at=g.updated_at||g.created_at||data.timestamp;
-      return nU(data);
-    }catch{return null}
+  const loadedNested=await Promise.all(cand.map(async g=>{
+    const jsonFiles=Object.values(g.files||{}).filter(f=>f?.filename?.endsWith(".json")&&f?.raw_url);
+    if(!jsonFiles.length)return [];
+    const rows=await Promise.all(jsonFiles.map(async jf=>{
+      try{
+        const data=await fetch(jf.raw_url).then(r=>r.json());
+        if(!data||!data.user)return null;
+        data.__updated_at=g.updated_at||g.created_at||data.timestamp;
+        return nU(data);
+      }catch{return null}
+    }));
+    return rows.filter(Boolean);
   }));
+  const loaded=loadedNested.flat();
   const byUser={};
   loaded.filter(Boolean).forEach(u=>{const k=u.user,ts=pTS(u.__updated_at||u.timestamp);if(!byUser[k]||ts>pTS(byUser[k].__updated_at||byUser[k].timestamp))byUser[k]=u});
   return Object.values(byUser);
