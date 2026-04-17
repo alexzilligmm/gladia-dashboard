@@ -165,7 +165,26 @@ document.getElementById("date-line").textContent=now.toLocaleDateString("en-GB",
 document.getElementById("last-refresh").textContent=`Refreshed ${now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`;updateSortOpts();render()}
 
 function pTS(ts){const v=Date.parse(ts||"");return Number.isFinite(v)?v:0}
-function nU(u){const m={};(u.usage||[]).forEach(x=>{if(!x?.account)return;const y=m[x.account]||(m[x.account]={account:x.account,consumed:0,num_jobs:0});y.consumed+=pH(x.consumed);y.num_jobs+=(Number(x.num_jobs)||0)});u.usage=(Object.values(m).map(x=>({account:x.account,consumed:x.consumed,num_jobs:x.num_jobs})));return u}
+function nU(u){
+  const totals=[];
+  if(Array.isArray(u.usage_totals)&&u.usage_totals.length){
+    u.usage_totals.forEach(x=>{if(!x?.account)return;totals.push({account:x.account,consumed:pH(x.consumed),num_jobs:Number(x.num_jobs)||0})});
+  }else{
+    const m={};
+    (u.usage||[]).forEach(x=>{if(!x?.account)return;const y=m[x.account]||(m[x.account]={account:x.account,consumed:0,num_jobs:0});y.consumed+=pH(x.consumed);y.num_jobs+=(Number(x.num_jobs)||0)});
+    Object.values(m).forEach(x=>totals.push(x));
+  }
+  u.usage=totals;
+
+  if(u.usage_grand_total&&u.usage_grand_total.consumed!==undefined){
+    u.total_consumed=pH(u.usage_grand_total.consumed);
+    u.total_jobs=Number(u.usage_grand_total.num_jobs)||0;
+  }else{
+    u.total_consumed=totals.reduce((s,x)=>s+pH(x.consumed),0);
+    u.total_jobs=totals.reduce((s,x)=>s+(Number(x.num_jobs)||0),0);
+  }
+  return u
+}
 function gId(source){const s=String(source||"").trim();if(!s)return"";const m=s.match(/([a-f0-9]{20,40})$/i);return m?m[1]:""}
 
 async function fG(){
@@ -256,7 +275,7 @@ return`<article class="project-card"><div class="p-header"><div class="p-title">
 ${cs.length>0?`<div class="contributors"><div class="contrib-hed"><span>Contributors · ${cs.length}</span>${partial?`<span class="contrib-partial">partial</span>`:""}</div>${show.map((c,i)=>`<div class="contrib-row"><span class="contrib-rank">${i+1}</span><span class="contrib-swatch" style="background:${uc(c.user)}"></span><span class="contrib-name">${E(c.user)}${pi===c.user?'<span class="chip chip-pi">PI</span>':''}</span><span class="contrib-hours tnum">${fH(c.hours)} h</span><span class="contrib-jobs tnum">${fI(c.jobs)} jobs</span></div>`).join("")}${cs.length>5?`<button class="expand-toggle" onclick="tE('p-${E(b.account)}')">${exp?"Show top 5":`Show all ${cs.length}`}</button>`:""}</div>`:`<div class="contributors"><div class="contrib-hed"><span>No contributors reported</span></div></div>`}</article>`}
 
 function rM(){if(!S.users.length)return'<div class="loading">No members yet.</div>';const bm={};S.users.forEach(u=>u.budgets?.forEach(b=>{bm[b.account]=b}));
-const ws=S.users.map(u=>{const tk=(u.usage||[]).reduce((s,x)=>s+pH(x.consumed),0),tj=(u.usage||[]).reduce((s,x)=>s+(x.num_jobs||0),0);let ga=0;(u.pi_of||[]).forEach(a=>{const b=bm[a];if(b)ga+=b.total});return{u,tk,ga,tj}});sortM(ws);
+const ws=S.users.map(u=>{const tk=Number(u.total_consumed)||0,tj=Number(u.total_jobs)||0;let ga=0;(u.pi_of||[]).forEach(a=>{const b=bm[a];if(b)ga+=b.total});return{u,tk,ga,tj}});sortM(ws);
 return`<div style="margin-top:20px">${ws.map(rMC).join("")}</div>`}
 
 function rMC({u:user,tk:taken,ga:gathered,tj:totalJobs}){const rj=(user.jobs||[]).filter(j=>j.state==="RUNNING"),isPi=(user.pi_of||[]).length>0,net=gathered-taken,col=uc(user.user);
@@ -268,7 +287,7 @@ ${rj.length>0?`<div class="jobs-list"><div class="jobs-head"><span>ID</span><spa
 ${prjs.length>0?`<div style="margin-top:16px"><div class="contrib-hed" style="padding-bottom:6px;margin:0 0 8px"><span>Per-project consumption</span><span style="font-weight:400;text-transform:none;letter-spacing:0;font-size:10px">${prjs.length}</span></div>${prjs.map(p=>{const h=pH(p.consumed);return`<div class="m-project-row"><div class="m-project-name-wrap"><span class="contrib-swatch" style="background:${col}"></span><span class="m-project-name">${E(p.account.replace(/^Iscr[CB]_/,""))}</span>${(user.pi_of||[]).includes(p.account)?'<span class="chip chip-pi">PI</span>':''}</div><span class="contrib-hours tnum">${fH(h)} h</span><span class="contrib-jobs tnum">${fI(p.num_jobs)} jobs</span><div class="m-project-bar"><div class="m-project-bar-fill" style="width:${(h/mxH)*100}%;background:${col}"></div></div></div>`}).join("")}</div>`:""}</article>`}
 
 /* ============  FUN STATS TAB  ============ */
-function gatherStats(){return S.users.map(u=>{const tk=(u.usage||[]).reduce((s,x)=>s+pH(x.consumed),0),tj=(u.usage||[]).reduce((s,x)=>s+(x.num_jobs||0),0);return{name:u.user,hours:tk,jobs:tj,hpj:tj>0?tk/tj:Infinity,col:uc(u.user)}})}
+function gatherStats(){return S.users.map(u=>{const tk=Number(u.total_consumed)||0,tj=Number(u.total_jobs)||0;return{name:u.user,hours:tk,jobs:tj,hpj:tj>0?tk/tj:Infinity,col:uc(u.user)}})}
 function medal(i){return i===0?"🥇":i===1?"🥈":i===2?"🥉":null}
 function lbHTML(title,sub,rows,valFmt){const mx=rows.length?Math.max(...rows.map(r=>r.val)):1;
 return`<div class="lb-section"><div class="lb-title">${title}</div><div class="lb-sub">${sub}</div>${rows.map((r,i)=>{const m=medal(i);return`<div class="lb-row"><span class="${m?'lb-medal':'lb-rank'}">${m||i+1}</span><span class="contrib-swatch" style="background:${r.col}"></span><span class="lb-name">${E(r.name)}</span><span class="lb-val">${valFmt(r.val)}</span><div class="lb-bar-wrap"><div class="lb-bar-fill" style="width:${(r.val/mx)*100}%;background:${r.col}"></div></div></div>`}).join("")}</div>`}

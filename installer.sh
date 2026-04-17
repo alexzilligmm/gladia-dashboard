@@ -214,6 +214,8 @@ cat >> "$BASHRC" <<'HPC_PUSH_FUNCTIONS'
 _hpc_build_json() {
   local TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)
   local PI_OF_JSON=""
+  local SALDO_R_RAW
+  SALDO_R_RAW=$(saldo -r -u "$USER" 2>/dev/null)
   if [ -n "$HPC_PI_PROJECTS" ]; then
     PI_OF_JSON=$(echo "$HPC_PI_PROJECTS" | awk '{for(i=1;i<=NF;i++) printf (i>1?",":"") "\"%s\"",$i}')
   fi
@@ -227,10 +229,24 @@ _hpc_build_json() {
       if (count++) printf ",\n";
       printf "    {\"account\":\"%s\",\"start\":\"%s\",\"end\":\"%s\",\"total\":%d,\"consumed\":%d,\"percent\":%.1f}", $1, $2, $3, $4, $6, $7
     }')
-  local USAGE_JSON=$(saldo -r -u "$USER" 2>/dev/null | \
+  local USAGE_JSON=$(printf "%s\n" "$SALDO_R_RAW" | \
     awk 'NF>=5 && $1 ~ /^[0-9]{8}$/ {
       if (count++) printf ",\n";
       printf "    {\"date\":\"%s\",\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $1, $3, $4, $5
+    }')
+  local USAGE_TOTALS_JSON=$(printf "%s\n" "$SALDO_R_RAW" | \
+    awk 'NF==4 && $1 !~ /^[0-9]{8}$/ && $2 != "Total" {
+      if (count++) printf ",\\n";
+      printf "    {\"account\":\"%s\",\"consumed\":\"%s\",\"num_jobs\":%d}", $2, $3, $4
+    }')
+  local USAGE_GRAND_TOTAL_JSON=$(printf "%s\n" "$SALDO_R_RAW" | \
+    awk '($1 == "Total" || $1 == "TOTAL") && NF>=3 {
+      printf "{\"consumed\":\"%s\",\"num_jobs\":%d}", $2, $3;
+      found=1;
+      exit
+    }
+    END {
+      if (!found) printf "{\"consumed\":\"0:00:00\",\"num_jobs\":0}";
     }')
   cat <<USERJSON
 {
@@ -246,7 +262,12 @@ $BUDGETS_JSON
   ],
   "usage": [
 $USAGE_JSON
-  ]
+  ],
+  "usage_totals": [
+$USAGE_TOTALS_JSON
+  ],
+  "usage_grand_total":
+$USAGE_GRAND_TOTAL_JSON
 }
 USERJSON
 }
@@ -390,6 +411,10 @@ hpc_debug() {
   echo
   echo "=== PARSED usage (daily) ==="
   saldo -r -u "$USER" 2>/dev/null | awk 'NF>=5 && $1 ~ /^[0-9]{8}$/ {printf "  %s  %-22s %s (%d jobs)\\n", $1, $3, $4, $5}'
+  echo
+  echo "=== PARSED usage (totals) ==="
+  saldo -r -u "$USER" 2>/dev/null | awk 'NF==4 && $1 !~ /^[0-9]{8}$/ && $2 != "Total" {printf "  %-22s %s (%d jobs)\\n", $2, $3, $4}'
+  saldo -r -u "$USER" 2>/dev/null | awk '($1=="Total" || $1=="TOTAL") && NF>=3 {printf "  GRAND TOTAL             %s (%d jobs)\\n", $2, $3; exit}'
   echo
   echo "PI projects: ${HPC_PI_PROJECTS:-none}"
   echo "Gist id: ${HPC_GIST_ID:-none}"
