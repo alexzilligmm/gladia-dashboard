@@ -147,7 +147,7 @@ select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none;backgro
         <div class="tip"><div class="tip-head">Use srun</div><div class="tip-body">Always launch your program with <code>srun python main.py</code>, even inside <code>sbatch</code>, so SLURM maps one task per GPU correctly.</div></div>
         <div class="tip"><div class="tip-head">No internet on nodes</div><div class="tip-body">Compute nodes can't reach the web. Pre-download datasets, weights, and wheels from a login node first.</div></div>
         <div class="tip"><div class="tip-head">Don't leak salloc</div><div class="tip-body">Interactive allocations bill until you <code>exit</code>. Check <code>squeue --me</code> before closing your laptop.</div></div>
-        <div class="tip"><div class="tip-head">No brute-force sweeps</div><div class="tip-body">Avoid 0.001 resolution grid searches. Brute forcing parameters it's very expensive even only in terms of overhead. </div></div>
+        <div class="tip"><div class="tip-head">No brute-force sweeps</div><div class="tip-body">Avoid 0.001 resolution grid searches. Brute forcing parameters is very expensive even only in terms of overhead. </div></div>
       </div>
     </section>
 
@@ -234,8 +234,9 @@ select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none;backgro
             <label class="form-label" for="tpl-qos">Quality of Service</label>
             <select id="tpl-qos" class="form-input" onchange="updateTpl()">
               <option value="normal" selected>Normal · up to 24 h</option>
-              <option value="lprod">Long (lprod) · up to 96 h</option>
               <option value="dbg">Debug · 30 min · max 8 GPUs</option>
+              <option value="bprod">Big (bprod) · at least 260 GPUs</option>
+              <option value="lprod">Long (lprod) · up to 96 h</option>
             </select>
             <span class="form-help">Normal omits the --qos line entirely.</span>
           </div>
