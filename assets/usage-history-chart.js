@@ -28,11 +28,6 @@
     return Math.max(100, Math.ceil(v / 100) * 100);
   }
 
-  function log2SnapMax(v) {
-    if (v <= 1) return 2;
-    return Math.pow(2, Math.ceil(Math.log2(v)));
-  }
-
   function buildDaily(users) {
     const points = 100;
     const now = new Date();
@@ -87,7 +82,7 @@
     return { labels, series, points, xEvery: 8 };
   }
 
-  function drawChart(canvas, labels, series, points, xEvery, scaleMode) {
+  function drawChart(canvas, labels, series, points, xEvery) {
     const scroll = canvas.parentElement;
     const dpr = window.devicePixelRatio || 1;
     const baseW = (scroll && scroll.getBoundingClientRect().width) || canvas.getBoundingClientRect().width || 960;
@@ -107,15 +102,10 @@
     const ph = H - pad.t - pad.b;
 
     const rawMax = Math.max(1, ...series.flatMap((s) => s.vals));
-    const maxV = scaleMode === "log2" ? log2SnapMax(rawMax) : linearSnapMax(rawMax);
-    const norm =
-      scaleMode === "log2"
-        ? function (v) {
-            return Math.log2(1 + Math.max(0, v)) / Math.log2(1 + maxV);
-          }
-        : function (v) {
-            return Math.max(0, v) / maxV;
-          };
+    const maxV = linearSnapMax(rawMax);
+    const norm = function (v) {
+      return Math.max(0, v) / maxV;
+    };
 
     ctx.strokeStyle = "#c0b9a8";
     ctx.lineWidth = 1;
@@ -130,10 +120,7 @@
     ctx.textAlign = "right";
     for (let i = 0; i <= 4; i++) {
       const y = pad.t + ph * (1 - i / 4);
-      const tick =
-        scaleMode === "log2"
-          ? Math.round(Math.pow(2, (Math.log2(maxV) * i) / 4))
-          : Math.round((maxV * i) / 4);
+      const tick = Math.round((maxV * i) / 4);
       ctx.fillText(String(tick), pad.l - 6, y + 3);
       if (i > 0) {
         ctx.save();
@@ -183,24 +170,18 @@
   function renderUsageHistory(users) {
     const canvas = document.getElementById("usage-history-canvas");
     const modeSelect = document.getElementById("usage-history-mode");
-    const scaleSelect = document.getElementById("usage-history-scale");
-    if (!canvas || !modeSelect || !scaleSelect) return;
+    if (!canvas || !modeSelect) return;
 
     const mode = modeSelect.value === "weekly" ? "weekly" : "daily";
-    const scaleMode = scaleSelect.value === "log2" ? "log2" : "linear";
     const built = mode === "weekly" ? buildWeekly(users) : buildDaily(users);
-    drawChart(canvas, built.labels, built.series, built.points, built.xEvery, scaleMode);
+    drawChart(canvas, built.labels, built.series, built.points, built.xEvery);
   }
 
   function initUsageHistoryChart(users) {
     const modeSelect = document.getElementById("usage-history-mode");
-    const scaleSelect = document.getElementById("usage-history-scale");
-    if (!modeSelect || !scaleSelect) return;
+    if (!modeSelect) return;
 
     modeSelect.onchange = function () {
-      renderUsageHistory(users);
-    };
-    scaleSelect.onchange = function () {
       renderUsageHistory(users);
     };
 

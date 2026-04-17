@@ -144,6 +144,7 @@
         iscraNextCallDate: null,
         iscraAcceptanceDate: null,
         iscraSafetyDate: null,
+        midnightAlert: false,
         redAlert: false,
       };
     }
@@ -155,12 +156,14 @@
         iscraNextCallDate: null,
         iscraAcceptanceDate: null,
         iscraSafetyDate: null,
+        midnightAlert: false,
         redAlert: false,
       };
     }
 
     const acceptanceDate = new Date(callDate.getTime() + 45 * 86400000);
     const safetyDate = new Date(acceptanceDate.getTime() + 30 * 86400000);
+    const midnightAlert = !!(doomsdayDate && doomsdayDate.getTime() < acceptanceDate.getTime());
     const redAlert = !!(doomsdayDate && doomsdayDate.getTime() < safetyDate.getTime());
 
     return {
@@ -168,6 +171,7 @@
       iscraNextCallDate: callDate,
       iscraAcceptanceDate: acceptanceDate,
       iscraSafetyDate: safetyDate,
+      midnightAlert,
       redAlert,
     };
   }
