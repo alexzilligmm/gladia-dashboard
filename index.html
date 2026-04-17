@@ -140,7 +140,7 @@ select.form-input{cursor:pointer;-webkit-appearance:none;appearance:none;backgro
 
     <section class="guide-section">
       <div class="guide-title">Best practices</div>
-      <div class="guide-sub">The stuff Davide keeps telling people in Slack</div>
+      <div class="guide-sub">The stuff Davide keeps telling people on Discord</div>
       <div class="tips-grid">
         <div class="tip"><div class="tip-head">Python envs</div><div class="tip-body">Use <code>uv</code> for fast, reproducible venvs. Stay on CUDA ≤ 12.6 to match the node modules.</div></div>
         <div class="tip"><div class="tip-head">Training code</div><div class="tip-body">Prefer Lightning with <code>ddp</code>, <code>bf16-mixed</code>, and <code>sync_batchnorm: true</code>. Set <code>num_nodes = ceil(#gpus / 4)</code>.</div></div>
