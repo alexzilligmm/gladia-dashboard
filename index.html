@@ -285,6 +285,8 @@ document.getElementById("date-line").textContent=now.toLocaleDateString("en-GB",
 document.getElementById("last-refresh").textContent=`Refreshed ${now.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}`;updateSortOpts();render()}
 
 function pTS(ts){const v=Date.parse(ts||"");return Number.isFinite(v)?v:0}
+function sUD(ms){const d=new Date(ms);return Date.UTC(d.getUTCFullYear(),d.getUTCMonth(),d.getUTCDate())}
+function yMS(s){if(!s||String(s).length!==8)return NaN;return Date.UTC(Number(s.slice(0,4)),Number(s.slice(4,6))-1,Number(s.slice(6,8)))}
 function nU(u){
   const daily=(Array.isArray(u.usage)?u.usage:[]).filter(x=>x&&x.date&&x.account);
   u.usage_daily=daily.map(x=>({date:x.date,account:x.account,consumed:pH(x.consumed),num_jobs:Number(x.num_jobs)||0}));
@@ -354,7 +356,7 @@ async function fG(){
 
 function bP(users){
   const pm={},pi={};
-  users.forEach(u=>{const ts=pTS(u.__updated_at||u.timestamp);(u.budgets||[]).forEach(b=>{if(!b?.account)return;const cur=pm[b.account];if(!cur||ts>cur.__ts){pm[b.account]={...b,percent:Number.isFinite(Number(b.percent))?Number(b.percent):((Number(b.total)||0)>0?((Number(b.consumed)||0)/(Number(b.total)||1))*100:0),__ts:ts}}});(u.pi_of||[]).forEach(acc=>{if(!pi[acc]||ts>pi[acc].ts)pi[acc]={user:u.user,ts}})});
+  users.forEach(u=>{const upd=u.__updated_at||u.timestamp||null,ts=pTS(upd);(u.budgets||[]).forEach(b=>{if(!b?.account)return;const cur=pm[b.account];if(!cur||ts>cur.__ts){pm[b.account]={...b,percent:Number.isFinite(Number(b.percent))?Number(b.percent):((Number(b.total)||0)>0?((Number(b.consumed)||0)/(Number(b.total)||1))*100:0),latest_update:upd,latest_update_ts:ts,__ts:ts}}});(u.pi_of||[]).forEach(acc=>{if(!pi[acc]||ts>pi[acc].ts)pi[acc]={user:u.user,ts}})});
   Object.values(pm).forEach(p=>{const mm={};users.forEach(u=>{const x=(u.usage||[]).find(z=>z.account===p.account);if(!x)return;mm[u.user]={user:u.user,account:p.account,consumed:x.consumed,num_jobs:x.num_jobs||0}});p.members=Object.values(mm);p.pi=pi[p.account]?.user||null});
   return Object.values(pm).map(({__ts,...rest})=>rest);
 }
@@ -415,7 +417,7 @@ return`<div style="margin-top:20px">${ws.map(rMC).join("")}</div>`}
 function rMC({u:user,tk:taken,ga:gathered,tj:totalJobs}){const rj=(user.jobs||[]).filter(j=>j.state==="RUNNING"),isPi=(user.pi_of||[]).length>0,net=gathered-taken,col=uc(user.user);
 const prjs=(user.usage||[]).slice().sort((a,b)=>pH(b.consumed)-pH(a.consumed)),mxH=prjs.length>0?pH(prjs[0].consumed):1;
 const ej=S.expanded[`j-${user.user}`],allj=(user.jobs||[]),jts=ej?allj.slice(0,10):allj.slice(0,3);
-const now=Date.now(),since=now-30*864e5,recent=(user.usage_daily||[]).filter(d=>{const t=pD(d.date).getTime();return Number.isFinite(t)&&t>=since&&t<=now});
+const now=Date.now(),cutoff=sUD(pTS(user.__updated_at||user.timestamp)||now)-864e5,since=cutoff-29*864e5,recent=(user.usage_daily||[]).filter(d=>{const t=yMS(d.date);return Number.isFinite(t)&&t>=since&&t<=cutoff});
 const depRate=recent.reduce((s,d)=>s+(Number(d.consumed)||0),0)/30;
 const activeAccounts=new Set((user.usage||[]).map(p=>p.account));let rem=0;activeAccounts.forEach(a=>{const b=(S.projects||[]).find(p=>p.account===a);if(!b)return;const k=pS(b).k;if((k==="active"||k==="ending")&&b.total>b.consumed)rem+=b.total-b.consumed});
 const depDays=depRate>0&&rem>0?Math.ceil(rem/depRate):null,depEta=depDays?new Date(now+depDays*864e5):null;

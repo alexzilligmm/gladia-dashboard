@@ -1,7 +1,21 @@
 (function () {
+  const DAY_MS = 86400000;
+
   function parseYmd(ymd) {
     if (!ymd || String(ymd).length !== 8) return new Date(NaN);
-    return new Date(`${ymd.slice(0, 4)}-${ymd.slice(4, 6)}-${ymd.slice(6, 8)}`);
+    return new Date(Date.UTC(Number(ymd.slice(0, 4)), Number(ymd.slice(4, 6)) - 1, Number(ymd.slice(6, 8))));
+  }
+
+  function startOfUtcDayMs(ms) {
+    const d = new Date(ms);
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+
+  function getProjectCutoffMs(project, nowMs) {
+    const raw = Date.parse((project && project.latest_update) || "");
+    const base = Number.isFinite(raw) ? raw : nowMs;
+    // Daily usage is finalized at midnight, so latest reliable day is the day before update.
+    return startOfUtcDayMs(base) - DAY_MS;
   }
 
   function getStatus(project, nowMs) {
@@ -15,17 +29,24 @@
   }
 
   function buildMonthlyRates(projects, users, nowMs) {
-    const sinceMs30 = nowMs - 30 * 86400000;
     const sums30 = Object.create(null);
-    const sinceMs7 = nowMs - 7 * 86400000;
     const sums7 = Object.create(null);
+    const cutoffByAccount = Object.create(null);
+
+    projects.forEach((p) => {
+      if (!p || !p.account) return;
+      cutoffByAccount[p.account] = getProjectCutoffMs(p, nowMs);
+    });
 
     users.forEach((u) => {
       (u.usage_daily || []).forEach((row) => {
-        const dateMs = parseYmd(row.date).getTime();
-        if (!Number.isFinite(dateMs) || dateMs < sinceMs30 || dateMs > nowMs) return;
         const account = row.account;
         if (!account) return;
+        const cutoffMs = Number.isFinite(cutoffByAccount[account]) ? cutoffByAccount[account] : getProjectCutoffMs(null, nowMs);
+        const sinceMs30 = cutoffMs - 29 * DAY_MS;
+        const sinceMs7 = cutoffMs - 6 * DAY_MS;
+        const dateMs = parseYmd(row.date).getTime();
+        if (!Number.isFinite(dateMs) || dateMs < sinceMs30 || dateMs > cutoffMs) return;
         sums30[account] = (sums30[account] || 0) + (Number(row.consumed) || 0);
         if (dateMs >= sinceMs7) {
           sums7[account] = (sums7[account] || 0) + (Number(row.consumed) || 0);
