@@ -1,6 +1,6 @@
 {
   "user": "azirilli",
-  "timestamp": "2026-04-17T06:10:27Z",
+  "timestamp": "2026-04-17T06:10:47Z",
   "hostname": "login07.leonardo.local",
   "pi_of": ["IscrC_eff-SAM2"],
   "jobs": [
@@ -17,11 +17,11 @@
     {"account":"IscrC_eff-SAM2","start":"20251222","end":"20260922","total":80000,"consumed":50041,"percent":62.6}
   ],
   "usage": [
-    {"account":"IscrC_USAE","consumed":"1281:41:53","num_jobs":306},
     {"account":"IscrC_NNID","consumed":"12292:23:46","num_jobs":2054},
-    {"account":"IscrC_TVU","consumed":"36997:32:13","num_jobs":6735},
     {"account":"IscrC_MGNTC","consumed":"565:55:46","num_jobs":212},
     {"account":"IscrC_SLEY","consumed":"15441:44:19","num_jobs":5578},
-    {"account":"IscrC_eff-SAM2","consumed":"2447:22:27","num_jobs":1092}
+    {"account":"IscrC_eff-SAM2","consumed":"2447:22:27","num_jobs":1092},
+    {"account":"IscrC_TVU","consumed":"36997:32:13","num_jobs":6735},
+    {"account":"IscrC_USAE","consumed":"1281:41:53","num_jobs":306}
   ]
 }
