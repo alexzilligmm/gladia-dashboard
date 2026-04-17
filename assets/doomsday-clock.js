@@ -15,23 +15,30 @@
   }
 
   function buildMonthlyRates(projects, users, nowMs) {
-    const sinceMs = nowMs - 30 * 86400000;
-    const sums = Object.create(null);
+    const sinceMs30 = nowMs - 30 * 86400000;
+    const sums30 = Object.create(null);
+    const sinceMs7 = nowMs - 7 * 86400000;
+    const sums7 = Object.create(null);
 
     users.forEach((u) => {
       (u.usage_daily || []).forEach((row) => {
         const dateMs = parseYmd(row.date).getTime();
-        if (!Number.isFinite(dateMs) || dateMs < sinceMs || dateMs > nowMs) return;
+        if (!Number.isFinite(dateMs) || dateMs < sinceMs30 || dateMs > nowMs) return;
         const account = row.account;
         if (!account) return;
-        sums[account] = (sums[account] || 0) + (Number(row.consumed) || 0);
+        sums30[account] = (sums30[account] || 0) + (Number(row.consumed) || 0);
+        if (dateMs >= sinceMs7) {
+          sums7[account] = (sums7[account] || 0) + (Number(row.consumed) || 0);
+        }
       });
     });
 
     const rates = Object.create(null);
     projects.forEach((p) => {
       const account = p.account;
-      const fromDaily = (sums[account] || 0) / 30;
+      const fromDaily30 = (sums30[account] || 0) / 30;
+      const fromDaily7 = (sums7[account] || 0) / 7;
+      const fromDaily = Math.max(fromDaily30, fromDaily7);
       if (fromDaily > 0) {
         rates[account] = fromDaily;
         return;
@@ -90,19 +97,10 @@
       active.splice(minIndex, 1);
 
       if (active.length > 0) {
-        let maxIndex = -1;
-        let maxRemaining = -Infinity;
-
-        for (let i = 0; i < active.length; i++) {
-          const curr = active[i];
-          curr.r = curr.r - curr.v * dt;
-          if (curr.r > maxRemaining) {
-            maxRemaining = curr.r;
-            maxIndex = i;
-          }
-        }
-
-        active[maxIndex].v += spilledRate;
+        active.forEach(a => {
+          a.r -= a.v * dt;
+          a.v += spilledRate / active.length;
+        });
       }
     }
 
