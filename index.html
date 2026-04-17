@@ -61,6 +61,8 @@
 .lb-name{font-weight:500}.lb-val{font-family:'JetBrains Mono',monospace;font-weight:500;font-size:13px;color:var(--ink)}
 .lb-bar-wrap{grid-column:3/5;height:4px;background:var(--rule-soft);border-radius:2px;overflow:hidden;margin-top:4px}.lb-bar-fill{height:100%;border-radius:2px}
 .svd-card{background:var(--card);border:1px solid var(--rule);border-radius:3px;padding:22px;box-shadow:var(--shadow)}.svd-card canvas{width:100%;height:220px;display:block;margin-top:10px}
+.chart-scroll{overflow-x:auto;overflow-y:hidden;padding-bottom:6px}.chart-scroll canvas{display:block;height:220px;min-width:100%}
+.chart-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.chart-head select{font-family:'JetBrains Mono',monospace;font-size:10px;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:4px 22px 4px 8px;color:var(--ink);cursor:pointer;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M0 0l5 6 5-6z' fill='%238a8478'/></svg>");background-repeat:no-repeat;background-position:right 6px center}
 .svd-legend{display:flex;flex-wrap:wrap;gap:10px 18px;margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:11px}.svd-legend-item{display:flex;align-items:center;gap:6px}.svd-legend-dot{width:10px;height:3px;border-radius:1px}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}@keyframes rise{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 .project-card:nth-child(1),.member-card:nth-child(1){animation-delay:.02s}.project-card:nth-child(2),.member-card:nth-child(2){animation-delay:.05s}.project-card:nth-child(3),.member-card:nth-child(3){animation-delay:.08s}.project-card:nth-child(4),.member-card:nth-child(4){animation-delay:.11s}.project-card:nth-child(5),.member-card:nth-child(5){animation-delay:.14s}.project-card:nth-child(6),.member-card:nth-child(6){animation-delay:.17s}.project-card:nth-child(7),.member-card:nth-child(7){animation-delay:.20s}.project-card:nth-child(8),.member-card:nth-child(8){animation-delay:.23s}
@@ -81,9 +83,12 @@
 <footer class="page-footer"><span>GLADIA · Sapienza University of Rome, by Alessandro Zirilli & Davide Marincione</span><span><a href="https://gladia.di.uniroma1.it" target="_blank">gladia.di.uniroma1.it</a> · <a href="https://github.com/alexzilligmm/gladia-dashboard" target="_blank">source</a></span></footer>
 </div>
 <script src="assets/doomsday-clock.js"></script>
+<script src="assets/usage-history-chart.js"></script>
 <script>
 function E(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
 const GIST_DESC_PREFIX="gladia-hpc-status-",MANUAL_GIST_SOURCES=["https://gist.github.com/Davide-F5-Marincione/b917fb214fb459ae61383c650d551c8f"],UC=["#2a5a8a","#5a7f3e","#b47628","#822235","#4a6d5c","#9c7a2c","#6e4e7d","#34656d","#8b6f47","#4d5d73","#7b4d62","#5d7c7a"];
+// Browser-edit toggle for alert QA: set to true to force the red-alert banner.
+const TEST_FORCE_RED_ALERT=false;
 function uc(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))|0;return UC[Math.abs(h)%UC.length]}
 let S={users:[],projects:[],view:"projects",sort:"status",msort:"consumed",filterActive:false,expanded:{}};
 function pH(s){if(s===null||s===undefined||s==="")return 0;if(typeof s==="number")return s;const p=String(s).split(":");return parseFloat(p[0]||0)+parseFloat(p[1]||0)/60+parseFloat(p[2]||0)/3600}
@@ -204,8 +209,12 @@ default:return bs.sort((a,b)=>{const sa=pS(a),sb=pS(b);return so[sa.k]!==so[sb.k
 
 function render(){const all=aB(),act=all.filter(b=>pS(b).k!=="expired").length,ov=all.filter(b=>b.percent>=100&&dB(pD(b.end))>=0).length,run=S.users.reduce((s,u)=>s+(u.jobs?.filter(j=>j.state==="RUNNING").length||0),0),tot=all.reduce((s,b)=>s+b.consumed,0);
 // Render Doomsday Clock if applicable
-const dd = typeof window.computeDoomsdayDate === "function" ? window.computeDoomsdayDate(all,S.users) : null;
-document.getElementById("doomsday-container").innerHTML = dd ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.04);border-color:rgba(130,34,53,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:0;margin-bottom:20px;"><div><div style="color:var(--bad);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">⏳</span> Doomsday Clock</div><div style="font-size:12px;color:var(--ink-muted)">Estimated depletion of all remaining HPC allocations across the lab.</div></div><div style="text-align:right"><div style="font-family:'EB Garamond',Georgia,serif;font-size:24px;color:var(--ink);font-weight:500;line-height:1">${dd.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bad);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${Math.max(0,Math.ceil((dd.getTime()-Date.now())/864e5))} days left</div></div></div>` : '';
+const ddi = typeof window.computeDoomsdayAlertInfo === "function" ? window.computeDoomsdayAlertInfo(all,S.users) : {doomsdayDate:(typeof window.computeDoomsdayDate === "function" ? window.computeDoomsdayDate(all,S.users) : null),redAlert:false,iscraSafetyDate:null,iscraAcceptanceDate:null};
+if(TEST_FORCE_RED_ALERT){ddi.redAlert=true;ddi.iscraAcceptanceDate=ddi.iscraAcceptanceDate||new Date(Date.now()+45*864e5);ddi.iscraSafetyDate=ddi.iscraSafetyDate||new Date(Date.now()+75*864e5)}
+const dd = ddi.doomsdayDate;
+const ddBanner = dd ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.04);border-color:rgba(130,34,53,.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;margin-top:0;margin-bottom:20px;"><div><div style="color:var(--bad);font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:2px;display:flex;align-items:center;gap:6px"><span style="font-size:14px">⏳</span> Doomsday Clock</div><div style="font-size:12px;color:var(--ink-muted)">Estimated depletion of all remaining HPC allocations across the lab.</div></div><div style="text-align:right"><div style="font-family:'EB Garamond',Georgia,serif;font-size:24px;color:var(--ink);font-weight:500;line-height:1">${dd.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}</div><div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--bad);text-transform:uppercase;letter-spacing:.05em;margin-top:4px">${Math.max(0,Math.ceil((dd.getTime()-Date.now())/864e5))} days left</div></div></div>` : '';
+const alertBanner = ddi.redAlert ? `<div class="banner" style="border-left-color:var(--bad);background:rgba(130,34,53,.12);border-color:rgba(130,34,53,.35);margin-top:0;margin-bottom:20px;"><div style="color:var(--bad);font-weight:700;font-size:12px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px">RED ALERT · ISCRA-C WINDOW RISK</div><div style="font-size:12px;color:var(--ink-soft)">Projected depletion precedes the safe replenishment window (next ISCRA-C acceptance + 30 days). Next acceptance: <span class="mono">${ddi.iscraAcceptanceDate?ddi.iscraAcceptanceDate.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"n/a"}</span>. Safety threshold: <span class="mono">${ddi.iscraSafetyDate?ddi.iscraSafetyDate.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}):"n/a"}</span>.</div></div>` : '';
+document.getElementById("doomsday-container").innerHTML = ddBanner + alertBanner;
 document.getElementById("stats").innerHTML=`<div class="stat"><div class="stat-label">Projects</div><div class="stat-value tnum">${act}</div><div class="stat-sub">of ${all.length} · ${ov} over</div></div><div class="stat"><div class="stat-label">Members</div><div class="stat-value tnum">${S.users.length}</div><div class="stat-sub">reporting</div></div><div class="stat"><div class="stat-label">Running</div><div class="stat-value tnum" style="color:${run>0?'var(--good)':'var(--ink-muted)'}">${run}</div><div class="stat-sub">jobs on cluster</div></div><div class="stat"><div class="stat-label">Consumed</div><div class="stat-value tnum">${fH(tot)}</div><div class="stat-sub">core-hours</div></div>`;
 document.getElementById("ct-projects").textContent=all.length;document.getElementById("ct-members").textContent=S.users.length;
 document.getElementById("content").innerHTML=S.view==="projects"?rP():S.view==="members"?rM():rF()}
@@ -260,35 +269,13 @@ html+=lbHTML("Speed Demon","lowest hours per job — the burst masters",bySpeed.
 html+=lbHTML("Hour Devourer","total core-hours consumed across all projects",byHours.map(u=>({name:u.name,val:u.hours,col:u.col})),v=>fH(v)+" h");
 html+=lbHTML("Snorlax Award","highest hours per job — masters of long naps",bySnorlax.map(u=>({name:u.name,val:u.hpj,col:u.col})),v=>v.toFixed(2)+" h/job");
 html+=lbHTML("Pyromaniac","largest single-day core-hour spike",dailyPeaks,v=>fH(v)+" h");
-html+=`<div class="lb-section"><div class="lb-title">Usage Per Day (30d)</div><div class="lb-sub">Real day-level core-hour usage from uploaded usage logs</div>
-<div class="svd-card"><canvas id="usage30-canvas" height="220"></canvas>
+html+=`<div class="lb-section"><div class="lb-title">Usage History</div><div class="lb-sub">Interactive real usage history (last 100 days or 100 weeks)</div>
+<div class="svd-card"><div class="chart-head"><span class="lb-sub" style="margin:0">window</span><select id="usage-history-mode"><option value="daily">Daily · last 100 days</option><option value="weekly">Weekly · last 100 weeks</option></select></div><div class="chart-scroll"><canvas id="usage-history-canvas" height="220"></canvas></div>
 <div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
 html+=`<div class="lb-section"><div class="lb-title">SVD Mentions Per Day</div><div class="lb-sub">Totally real metric tracked by our monitoring infrastructure</div>
 <div class="svd-card"><canvas id="svd-canvas" height="220"></canvas>
 <div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
 html+='</div>';return html}
-
-function usage30Series(){
-const days=30,now=new Date(),keys=[];for(let i=days-1;i>=0;i--){const d=new Date(now.getTime()-i*864e5);keys.push(`${d.getUTCFullYear()}${String(d.getUTCMonth()+1).padStart(2,"0")}${String(d.getUTCDate()).padStart(2,"0")}`)}
-return S.users.map(u=>{const m={};(u.usage_daily||[]).forEach(r=>{m[r.date]=(m[r.date]||0)+(Number(r.consumed)||0)});return{name:u.user,col:uc(u.user),vals:keys.map(k=>m[k]||0)}})
-}
-
-function drawUsage30(){
-const cv=document.getElementById("usage30-canvas");if(!cv)return;
-const dpr=window.devicePixelRatio||1;const rect=cv.getBoundingClientRect();
-cv.width=rect.width*dpr;cv.height=220*dpr;
-const ctx=cv.getContext("2d");ctx.scale(dpr,dpr);
-const W=rect.width,H=220,pad={t:16,b:28,l:40,r:16};
-const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;
-const series=usage30Series(),days=30,maxV=Math.max(1,...series.flatMap(s=>s.vals));
-ctx.strokeStyle="#c0b9a8";ctx.lineWidth=1;
-ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,H-pad.b);ctx.lineTo(W-pad.r,H-pad.b);ctx.stroke();
-ctx.fillStyle="#8a8478";ctx.font="9px 'JetBrains Mono',monospace";ctx.textAlign="right";
-for(let i=0;i<=4;i++){const y=pad.t+ph*(1-i/4);const tick=Math.round((maxV*i/4));ctx.fillText(tick,pad.l-6,y+3);if(i>0){ctx.save();ctx.strokeStyle="#ebe3ce";ctx.setLineDash([3,3]);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(W-pad.r,y);ctx.stroke();ctx.restore()}}
-ctx.textAlign="center";
-for(let d=0;d<days;d+=5){const x=pad.l+pw*(d/(days-1));ctx.fillText("d"+(d+1),x,H-pad.b+14)}
-series.forEach(s=>{ctx.strokeStyle=s.col;ctx.lineWidth=2.2;ctx.lineJoin="round";ctx.beginPath();s.vals.forEach((v,i)=>{const x=pad.l+pw*(i/(days-1)),y=pad.t+ph*(1-v/maxV);if(i===0)ctx.moveTo(x,y);else{const px=pad.l+pw*((i-1)/(days-1)),py=pad.t+ph*(1-s.vals[i-1]/maxV);const cx1=px+(x-px)*.4,cx2=x-(x-px)*.4;ctx.bezierCurveTo(cx1,py,cx2,y,x,y)}});ctx.stroke()})
-}
 
 function drawSVD(){
 const cv=document.getElementById("svd-canvas");if(!cv)return;
@@ -317,7 +304,7 @@ if(i===0)ctx.moveTo(x,y);else{const px=pad.l+pw*((i-1)/(days-1)),py=pad.t+ph*(1-
 const cx1=px+(x-px)*.4,cx2=x-(x-px)*.4;ctx.bezierCurveTo(cx1,py,cx2,y,x,y)}});
 ctx.stroke()})}
 
-new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(()=>{drawUsage30();drawSVD()})}).observe(document.getElementById("content"),{childList:true});
+new MutationObserver(()=>{if(S.view==="fun")requestAnimationFrame(()=>{if(typeof window.initUsageHistoryChart==="function")window.initUsageHistoryChart(S.users);drawSVD()})}).observe(document.getElementById("content"),{childList:true});
 fetchData();
 </script>
 </body>
