@@ -166,6 +166,8 @@ document.getElementById("last-refresh").textContent=`Refreshed ${now.toLocaleTim
 
 function pTS(ts){const v=Date.parse(ts||"");return Number.isFinite(v)?v:0}
 function nU(u){
+  const daily=(Array.isArray(u.usage)?u.usage:[]).filter(x=>x&&x.date&&x.account);
+  u.usage_daily=daily.map(x=>({date:x.date,account:x.account,consumed:pH(x.consumed),num_jobs:Number(x.num_jobs)||0}));
   const totals=[];
   if(Array.isArray(u.usage_totals)&&u.usage_totals.length){
     u.usage_totals.forEach(x=>{if(!x?.account)return;totals.push({account:x.account,consumed:pH(x.consumed),num_jobs:Number(x.num_jobs)||0})});
@@ -185,6 +187,7 @@ function nU(u){
   }
   return u
 }
+function fDay(s){if(!s||String(s).length!==8)return"?";return`${s.slice(0,4)}-${s.slice(4,6)}-${s.slice(6,8)}`}
 function gId(source){const s=String(source||"").trim();if(!s)return"";const m=s.match(/([a-f0-9]{20,40})$/i);return m?m[1]:""}
 
 async function fG(){
@@ -303,10 +306,14 @@ const st=gatherStats();
 const byJobs=[...st].sort((a,b)=>b.jobs-a.jobs);
 const byHours=[...st].sort((a,b)=>b.hours-a.hours);
 const bySpeed=[...st].filter(u=>u.jobs>0).sort((a,b)=>a.hpj-b.hpj);
+const bySnorlax=[...st].filter(u=>u.jobs>0).sort((a,b)=>b.hpj-a.hpj);
+const dailyPeaks=S.users.map(u=>{const d=(u.usage_daily||[]).slice().sort((a,b)=>b.consumed-a.consumed)[0];return d?{name:`${u.user} · ${fDay(d.date)}`,val:d.consumed,col:uc(u.user)}:null}).filter(Boolean).sort((a,b)=>b.val-a.val);
 let html='<div style="margin-top:20px">';
 html+=lbHTML("Job Machine","who has submitted the most jobs",byJobs.map(u=>({name:u.name,val:u.jobs,col:u.col})),v=>fI(v)+" jobs");
 html+=lbHTML("Speed Demon","lowest hours per job — the burst masters",bySpeed.map(u=>({name:u.name,val:u.hpj,col:u.col})),v=>v.toFixed(2)+" h/job");
 html+=lbHTML("Hour Devourer","total core-hours consumed across all projects",byHours.map(u=>({name:u.name,val:u.hours,col:u.col})),v=>fH(v)+" h");
+html+=lbHTML("Snorlax Award","highest hours per job — masters of long naps",bySnorlax.map(u=>({name:u.name,val:u.hpj,col:u.col})),v=>v.toFixed(2)+" h/job");
+html+=lbHTML("Pyromaniac","largest single-day core-hour spike",dailyPeaks,v=>fH(v)+" h");
 html+=`<div class="lb-section"><div class="lb-title">SVD Mentions Per Day</div><div class="lb-sub">Totally real metric tracked by our monitoring infrastructure</div>
 <div class="svd-card"><canvas id="svd-canvas" height="220"></canvas>
 <div class="svd-legend">${st.map(u=>`<span class="svd-legend-item"><span class="svd-legend-dot" style="background:${u.col}"></span>${E(u.name)}</span>`).join("")}</div></div></div>`;
