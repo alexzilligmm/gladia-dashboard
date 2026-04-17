@@ -1,0 +1,28 @@
+{
+  "user": "dcrisost",
+  "timestamp": "2026-04-17T17:26:37Z",
+  "hostname": "login01.leonardo.local",
+  "pi_of": ["IscrC_M4R","IscrC_USAE"],
+  "jobs": [
+
+  ],
+  "budgets": [
+    {"account":"IscrC_M4R","start":"20251103","end":"20260803","total":80000,"consumed":87333,"percent":109.2},
+    {"account":"IscrC_RDM","start":"20250226","end":"20251126","total":80000,"consumed":79376,"percent":99.2},
+    {"account":"IscrC_TVU","start":"20251103","end":"20260803","total":80000,"consumed":42379,"percent":53.0},
+    {"account":"IscrC_LENS","start":"20251125","end":"20260825","total":80000,"consumed":82311,"percent":102.9},
+    {"account":"IscrC_SIMP","start":"20251125","end":"20260825","total":80000,"consumed":2283,"percent":2.9},
+    {"account":"IscrC_SLEY","start":"20250620","end":"20260320","total":80000,"consumed":86430,"percent":108.0},
+    {"account":"IscrC_USAE","start":"20250327","end":"20251227","total":80000,"consumed":82037,"percent":102.5},
+    {"account":"IscrC_YENDRI","start":"20251103","end":"20260803","total":80000,"consumed":6428,"percent":8.0}
+  ],
+  "usage": [
+    {"account":"IscrC_RDM","consumed":"1035:23:33","num_jobs":309},
+    {"account":"IscrC_LENS","consumed":"2301:36:19","num_jobs":1889},
+    {"account":"IscrC_USAE","consumed":"245:27:18","num_jobs":201},
+    {"account":"IscrC_TVU","consumed":"1886:43:28","num_jobs":287},
+    {"account":"IscrC_SLEY","consumed":"2628:37:54","num_jobs":243},
+    {"account":"IscrC_M4R","consumed":"596:29:18","num_jobs":9},
+    {"account":"IscrC_MGNTC","consumed":"6644:14:47","num_jobs":582}
+  ]
+}
