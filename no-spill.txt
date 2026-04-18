@@ -4,3 +4,4 @@
 # They can still spill into other projects when they deplete/expire.
 # Example:
 # IscrC_external-allocation
+EUHPC_D26_044   #from omnai
