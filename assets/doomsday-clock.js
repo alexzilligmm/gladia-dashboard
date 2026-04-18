@@ -1,5 +1,38 @@
 (function () {
   const DAY_MS = 86400000;
+  const NO_SPILL_FILE = "no-spill.txt";
+  let noSpillProjects = new Set();
+
+  function normalizeAccountName(value) {
+    return String(value || "").trim().toUpperCase();
+  }
+
+  async function refreshNoSpillProjects() {
+    try {
+      const res = await fetch(NO_SPILL_FILE, { cache: "no-store" });
+      if (!res.ok) {
+        if (res.status === 404) {
+          noSpillProjects = new Set();
+          return;
+        }
+        throw new Error("no-spill.txt fetch failed: " + res.status);
+      }
+      const text = await res.text();
+      const next = new Set();
+      text.split(/\r?\n/).forEach((line) => {
+        const cleaned = line.replace(/#.*/, "").trim();
+        if (!cleaned) return;
+        next.add(normalizeAccountName(cleaned));
+      });
+      noSpillProjects = next;
+    } catch (_) {
+      // Keep the last known list on network/parsing errors.
+    }
+  }
+
+  function isNoSpillAccount(account) {
+    return noSpillProjects.has(normalizeAccountName(account));
+  }
 
   function parseYmd(ymd) {
     if (!ymd || String(ymd).length !== 8) return new Date(NaN);
@@ -87,17 +120,19 @@
       const rate = rates[p.account] || 0;
       const remaining = Math.max(0, (Number(p.total) || 0) - (Number(p.consumed) || 0));
       const expiresIn = (parseYmd(p.end).getTime() - nowMs) / 86400000;
+      const noSpill = isNoSpillAccount(p.account);
 
       if (rate > 0 && remaining > 0 && expiresIn > 0) {
-        active.push({ r: remaining, v: rate, e: expiresIn });
+        active.push({ r: remaining, v: rate, e: expiresIn, noSpill });
       }
     });
 
     if (!active.length) return null;
+    if (!active.some((a) => !a.noSpill)) return null;
 
     // Same depletion simulation as before, with updated v from 30-day averages.
     let t = 0;
-    while (active.length > 0) {
+    while (active.length > 0 && active.some((a) => !a.noSpill)) {
       let dt = Infinity;
       let minIndex = -1;
       let spilledRate = 0;
@@ -118,9 +153,12 @@
       active.splice(minIndex, 1);
 
       if (active.length > 0) {
-        active.forEach(a => {
+        const spillTargets = active.filter((a) => !a.noSpill);
+        active.forEach((a) => {
           a.r -= a.v * dt;
-          a.v += spilledRate / active.length;
+          if (spillTargets.length > 0 && !a.noSpill) {
+            a.v += spilledRate / spillTargets.length;
+          }
         });
       }
     }
@@ -197,4 +235,8 @@
 
   window.computeDoomsdayDate = computeDoomsdayDate;
   window.computeDoomsdayAlertInfo = computeDoomsdayAlertInfo;
+  window.refreshNoSpillProjects = refreshNoSpillProjects;
+
+  // Warm the cache so the first full refresh can use the list.
+  refreshNoSpillProjects();
 })();

@@ -1,0 +1,6 @@
+# One project account per line.
+# Projects listed here will not receive spill in the doomsday model,
+# and they are excluded from the final doomsday endpoint.
+# They can still spill into other projects when they deplete/expire.
+# Example:
+# IscrC_external-allocation

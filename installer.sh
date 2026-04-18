@@ -12,6 +12,27 @@ DEFAULT_GIST_ID="b917fb214fb459ae61383c650d551c8f"
 
 MODE="${1:-install}"
 
+_remove_install_block() {
+  local TARGET_FILE="$1"
+
+  if [ ! -f "$TARGET_FILE" ]; then
+    return 1
+  fi
+
+  if grep -q "$MARKER_BEGIN" "$TARGET_FILE" && grep -q "$MARKER_END" "$TARGET_FILE"; then
+    sed -i "/$MARKER_BEGIN/,/$MARKER_END/d" "$TARGET_FILE"
+    return 0
+  fi
+
+  # Recover from interrupted previous installs where end marker was not written.
+  if grep -q "$MARKER_BEGIN" "$TARGET_FILE"; then
+    sed -i "/$MARKER_BEGIN/,$d" "$TARGET_FILE"
+    return 0
+  fi
+
+  return 1
+}
+
 if [[ "$MODE" == "--uninstall" || "$MODE" == "uninstall" ]]; then
   echo ""
   echo " GLADIA HPC Status Push — Uninstall"
@@ -26,8 +47,7 @@ if [[ "$MODE" == "--uninstall" || "$MODE" == "uninstall" ]]; then
   cp "$BASHRC" "$BASHRC.bak.$(date +%s)"
   echo " ✓ Backed up $BASHRC"
 
-  if grep -q "$MARKER_BEGIN" "$BASHRC"; then
-    sed -i "/$MARKER_BEGIN/,/$MARKER_END/d" "$BASHRC"
+  if _remove_install_block "$BASHRC"; then
     echo " ✓ Removed GLADIA install block"
   else
     echo " Nothing to remove: install block not found"
@@ -80,11 +100,29 @@ EXISTING_PI=""
 EXISTING_GIST_ID="$DEFAULT_GIST_ID"
 HAS_PREVIOUS=0
 
+_extract_existing_export() {
+  local VAR_NAME="$1"
+  if [ ! -f "$BASHRC" ]; then
+    return 0
+  fi
+  awk -v begin="$MARKER_BEGIN" -v end="$MARKER_END" -v var="$VAR_NAME" '
+    $0 == begin { in_block=1; next }
+    $0 == end   { in_block=0 }
+    in_block && $0 ~ "^export " var "=" {
+      line = $0
+      sub("^export " var "=\"", "", line)
+      sub("\"$", "", line)
+      print line
+      exit
+    }
+  ' "$BASHRC"
+}
+
 if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
   HAS_PREVIOUS=1
-  EXISTING_TOKEN=$(grep '^export HPC_GITHUB_TOKEN=' "$BASHRC" | head -1 | sed 's/^export HPC_GITHUB_TOKEN="\(.*\)"$/\1/')
-  EXISTING_PI=$(grep '^export HPC_PI_PROJECTS=' "$BASHRC" | head -1 | sed 's/^export HPC_PI_PROJECTS="\(.*\)"$/\1/')
-  FOUND_GIST_ID=$(grep '^export HPC_GIST_ID=' "$BASHRC" | head -1 | sed 's/^export HPC_GIST_ID="\(.*\)"$/\1/')
+  EXISTING_TOKEN=$(_extract_existing_export "HPC_GITHUB_TOKEN")
+  EXISTING_PI=$(_extract_existing_export "HPC_PI_PROJECTS")
+  FOUND_GIST_ID=$(_extract_existing_export "HPC_GIST_ID")
   if [ -n "$FOUND_GIST_ID" ]; then
     EXISTING_GIST_ID="$FOUND_GIST_ID"
   fi
@@ -93,11 +131,13 @@ if [ -f "$BASHRC" ] && grep -q "$MARKER_BEGIN" "$BASHRC"; then
 fi
 
 # ---------- Project name normalizer ----------
-# Converts portal IDs (IsCd3_M4R / IsBd2_M4R) to saldo IDs (IscrC_M4R / IscrB_M4R)
+# Converts known portal IDs to saldo IDs and keeps other prefixes unchanged.
 _normalize_project_name() {
   local NAME="$1"
   if [[ "$NAME" =~ ^Is([CB])[[:alnum:]][[:alnum:]]_(.+)$ ]]; then
     echo "Iscr${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
+  elif [[ "$NAME" =~ ^[Ee][Uu][Hh][Pp][Cc]_(.+)$ ]]; then
+    echo "EUHPC_${BASH_REMATCH[1]}"
   else
     echo "$NAME"
   fi
@@ -124,7 +164,16 @@ _extract_gist_id() {
 }
 
 if [ -z "$TOKEN" ]; then
-  read -p " GitHub token: " TOKEN
+  if [ -n "$EXISTING_TOKEN" ]; then
+    read -p " GitHub token (Enter to keep existing): " TOKEN_INPUT
+    if [ -n "$TOKEN_INPUT" ]; then
+      TOKEN="$TOKEN_INPUT"
+    else
+      TOKEN="$EXISTING_TOKEN"
+    fi
+  else
+    read -p " GitHub token: " TOKEN
+  fi
 fi
 
 # ---------- Optional pinned gist target ----------
@@ -154,7 +203,7 @@ elif [ -n "$EXISTING_PI" ]; then
 elif [ "$HAS_PREVIOUS" = "1" ]; then
   read -p " PI projects (Enter to skip, or space-separated list): " PI_PROJECTS
 else
-  read -p " Are you PI of ISCRA projects? List them (e.g. IscrC_eff-SAM2 IscrC_LENS) or Enter to skip: " PI_PROJECTS
+  read -p " Are you PI of HPC projects? List them (e.g. IscrC_eff-SAM2 EUHPC_demo) or Enter to skip: " PI_PROJECTS
 fi
 
 # ---------- Normalize portal-style project names ----------
@@ -168,9 +217,9 @@ echo ""
 echo " ✓ Backed up $BASHRC"
 
 # ---------- Remove old block ----------
-if grep -q "$MARKER_BEGIN" "$BASHRC"; then
-  sed -i "/$MARKER_BEGIN/,/$MARKER_END/d" "$BASHRC"
-  echo " ✓ Removed previous install block"
+if _remove_install_block "$BASHRC"; then
+  echo " ✓ Previous setup detected"
+  echo " ✓ Removed previous install block before reinstall"
 fi
 
 # ---------- Part 1: Variables ----------
@@ -435,15 +484,22 @@ hpc_test() {
 
 hpc_addproject() {
   if [ -z "$1" ]; then
-    echo "Usage: hpc-addproject IscrC_myproject"
+    echo "Usage: hpc-addproject <project_code>"
+    echo "Examples: hpc-addproject IscrC_myproject | hpc-addproject EUHPC_myproject"
     echo "Current PI projects: ${HPC_PI_PROJECTS:-none}"
     return 1
   fi
   local PROJECT="$1"
-  # Normalize portal ID (IsCd3_M4R / IsBd2_M4R) to saldo ID (IscrC_M4R / IscrB_M4R)
+  # Normalize known aliases (portal IsC*/IsB* IDs, EUHPC case variants).
   if [[ "$PROJECT" =~ ^Is([CB])[[:alnum:]][[:alnum:]]_(.+)$ ]]; then
     local NORMALIZED="Iscr${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
     echo "  Normalized: $PROJECT → $NORMALIZED"
+    PROJECT="$NORMALIZED"
+  elif [[ "$PROJECT" =~ ^[Ee][Uu][Hh][Pp][Cc]_(.+)$ ]]; then
+    local NORMALIZED="EUHPC_${BASH_REMATCH[1]}"
+    if [ "$PROJECT" != "$NORMALIZED" ]; then
+      echo "  Normalized: $PROJECT → $NORMALIZED"
+    fi
     PROJECT="$NORMALIZED"
   fi
   # Check if already listed
@@ -466,14 +522,17 @@ hpc_addproject() {
 
 hpc_rmproject() {
   if [ -z "$1" ]; then
-    echo "Usage: hpc-rmproject IscrC_myproject"
+    echo "Usage: hpc-rmproject <project_code>"
+    echo "Examples: hpc-rmproject IscrC_myproject | hpc-rmproject EUHPC_myproject"
     echo "Current PI projects: ${HPC_PI_PROJECTS:-none}"
     return 1
   fi
   local PROJECT="$1"
-  # Normalize portal ID so users can remove with either form
+  # Normalize known aliases so users can remove with either form
   if [[ "$PROJECT" =~ ^Is([CB])[[:alnum:]][[:alnum:]]_(.+)$ ]]; then
     PROJECT="Iscr${BASH_REMATCH[1]}_${BASH_REMATCH[2]}"
+  elif [[ "$PROJECT" =~ ^[Ee][Uu][Hh][Pp][Cc]_(.+)$ ]]; then
+    PROJECT="EUHPC_${BASH_REMATCH[1]}"
   fi
   export HPC_PI_PROJECTS=$(echo "$HPC_PI_PROJECTS" | sed "s|$PROJECT||g" | tr -s ' ' | sed 's/^ //;s/ $//')
   sed -i "s|^export HPC_PI_PROJECTS=\".*\"|export HPC_PI_PROJECTS=\"$HPC_PI_PROJECTS\"|" "$HOME/.bashrc"
