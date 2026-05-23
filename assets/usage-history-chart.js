@@ -165,6 +165,12 @@
       // Keep latest values visible by default.
       scroll.scrollLeft = scroll.scrollWidth;
     }
+
+    // Expose state so the dashboard's hover helper can identify lines by name.
+    window._chartState = window._chartState || {};
+    window._chartState[canvas.id] = {
+      pad, ph, plotW, points, series, labels, maxV,
+    };
   }
 
   function renderUsageHistory(users) {
